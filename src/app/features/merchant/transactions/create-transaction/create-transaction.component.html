@@ -1,0 +1,93 @@
+<div class="animate-fade-in max-w-7xl">
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-black mb-1 tracking-tight">New Transaction</h1>
+    <p class="text-black-soft">Select products and create a payment request</p>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-6 items-start">
+    <!-- Product Grid -->
+    <div>
+      <div class="bg-white border border-cream-dark rounded-xl p-4 shadow-sm mb-6">
+        <div class="relative max-w-md">
+          <app-icon name="search" class="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2"></app-icon>
+          <input type="text" class="w-full bg-cream border border-cream-dark rounded-md pl-10 pr-4 py-2.5 text-black focus:outline-none focus:border-emerald-dark focus:ring-1 focus:ring-emerald-dark transition-all" [(ngModel)]="search"
+            placeholder="Search products...">
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+        @for (p of filteredProducts(); track p.id) {
+          <div class="bg-white border border-cream-dark rounded-xl p-3 cursor-pointer transition-all hover:border-emerald-dark hover:shadow-md hover:-translate-y-1 relative overflow-hidden group" [class.opacity-50]="!p.isActive || p.stock === 0" [class.cursor-not-allowed]="!p.isActive || p.stock === 0" [class.hover:translate-y-0]="!p.isActive || p.stock === 0" [class.hover:border-cream-dark]="!p.isActive || p.stock === 0" [class.hover:shadow-sm]="!p.isActive || p.stock === 0"
+            (click)="addToCart(p)">
+            <div class="w-full aspect-square rounded-lg bg-cream flex items-center justify-center mb-3 overflow-hidden">
+              @if (p.imageUrl) {
+                <img [src]="p.imageUrl" [alt]="p.name" class="w-full h-full object-cover">
+              } @else {
+                <app-icon name="box" class="w-7 h-7 text-emerald-dark"></app-icon>
+              }
+            </div>
+            <div>
+              <div class="font-bold text-sm mb-1 truncate">{{ p.name }}</div>
+              <div class="text-emerald-dark font-extrabold text-sm">{{ p.price | currencyIdr }}</div>
+              <div class="text-gray-400 text-xs mt-1 font-medium">Stock: {{ p.stock }}</div>
+            </div>
+            @if (!p.isActive || p.stock === 0) {
+              <div class="absolute inset-0 bg-black/60 flex items-center justify-center text-xs font-bold text-red-400 backdrop-blur-[1px]">Out of Stock</div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Cart -->
+    <div class="bg-white border border-cream-dark rounded-xl p-6 shadow-sm sticky top-24">
+      <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
+        <app-icon name="cart" class="w-5 h-5 text-emerald-dark"></app-icon>
+        Cart
+      </h3>
+
+      @if (cart().length === 0) {
+        <div class="text-center py-8 px-4">
+          <div class="mx-auto w-12 h-12 rounded-full bg-cream flex items-center justify-center mb-3">
+            <app-icon name="cart" class="w-6 h-6 text-emerald-dark"></app-icon>
+          </div>
+          <p class="text-gray-500 text-sm font-medium">Add products from the left to start a transaction</p>
+        </div>
+      } @else {
+        <div class="flex flex-col gap-3 mb-4 max-h-[400px] overflow-y-auto pr-2">
+          @for (item of cart(); track item.productId) {
+            <div class="flex items-center gap-3 p-3 bg-cream/50 rounded-lg border border-cream-dark">
+              <div class="flex-1 min-w-0">
+                <div class="font-bold text-sm truncate">{{ item.name }}</div>
+                <div class="text-emerald-dark font-bold text-sm">{{ item.price | currencyIdr }}</div>
+              </div>
+              <div class="flex items-center gap-2 bg-white rounded-md p-1 shadow-sm border border-cream-dark">
+                <button class="w-7 h-7 flex items-center justify-center text-emerald-dark hover:bg-emerald-dark/10 rounded transition-colors font-bold" (click)="updateQty(item, item.quantity - 1)">−</button>
+                <span class="min-w-[20px] text-center font-bold text-sm">{{ item.quantity }}</span>
+                <button class="w-7 h-7 flex items-center justify-center text-emerald-dark hover:bg-emerald-dark/10 rounded transition-colors font-bold" (click)="updateQty(item, item.quantity + 1)">+</button>
+              </div>
+            </div>
+          }
+        </div>
+
+        <div class="h-px bg-cream-dark w-full my-4"></div>
+        <div class="flex justify-between items-center mb-6">
+          <span class="text-gray-500 font-bold uppercase tracking-wider text-sm">Total</span>
+          <span class="font-extrabold text-2xl text-emerald-dark">{{ total | currencyIdr }}</span>
+        </div>
+
+        <button class="w-full bg-emerald-dark hover:bg-black text-white font-bold py-3.5 px-4 rounded-lg transition-all disabled:opacity-50 text-lg shadow-md mb-2" [disabled]="loading()" (click)="submit()">
+          @if (loading()) { 
+            <span class="inline-block w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2 align-middle"></span> Processing... 
+          } @else { 
+            Create Transaction 
+          }
+        </button>
+        <button class="w-full bg-transparent hover:bg-red-50 text-red-500 font-semibold py-2.5 px-4 rounded-lg transition-all border border-transparent hover:border-red-100 text-sm flex items-center justify-center gap-2" (click)="clearCart()">
+          <app-icon name="trash" class="w-4 h-4"></app-icon>
+          Clear Cart
+        </button>
+      }
+    </div>
+  </div>
+</div>

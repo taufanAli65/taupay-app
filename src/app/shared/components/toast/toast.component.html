@@ -1,0 +1,23 @@
+<div class="fixed bottom-6 right-6 z-[9999] flex flex-col gap-3 pointer-events-none">
+  @for (toast of toastService.toasts(); track toast.id) {
+    <div class="flex items-center gap-3 py-3 px-4 rounded-xl border text-sm font-bold max-w-[360px] shadow-lg pointer-events-auto cursor-pointer backdrop-blur-md transition-all hover:-translate-y-1"
+         style="animation: slideInRight 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)"
+         [class.bg-green-50]="toast.type === 'success'" [class.border-green-200]="toast.type === 'success'" [class.text-green-800]="toast.type === 'success'"
+         [class.bg-red-50]="toast.type === 'danger'" [class.border-red-200]="toast.type === 'danger'" [class.text-red-800]="toast.type === 'danger'"
+         [class.bg-yellow-50]="toast.type === 'warning'" [class.border-yellow-200]="toast.type === 'warning'" [class.text-yellow-800]="toast.type === 'warning'"
+         [class.bg-blue-50]="toast.type === 'info'" [class.border-blue-200]="toast.type === 'info'" [class.text-blue-800]="toast.type === 'info'"
+         (click)="toastService.dismiss(toast.id)">
+      <app-icon [name]="iconName(toast.type)" class="w-5 h-5 shrink-0 drop-shadow-sm"></app-icon>
+      <span class="flex-1">{{ toast.message }}</span>
+      <button class="bg-transparent border-none text-current opacity-40 hover:opacity-100 cursor-pointer text-xs p-1 ml-1 transition-opacity">
+        <app-icon name="close" class="w-3.5 h-3.5"></app-icon>
+      </button>
+    </div>
+  }
+</div>
+<style>
+  @keyframes slideInRight {
+    from { opacity: 0; transform: translateX(50px) scale(0.95); }
+    to { opacity: 1; transform: translateX(0) scale(1); }
+  }
+</style>

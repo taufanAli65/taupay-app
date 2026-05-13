@@ -1,0 +1,135 @@
+<div class="font-sans bg-cream text-black min-h-screen">
+  <!-- Navigasi -->
+  <nav class="flex justify-between items-center py-6 px-5 md:px-[5%]">
+    <div class="font-bold text-2xl text-emerald-dark">TauPay_</div>
+    <ul class="flex items-center gap-4 md:gap-8">
+      <li class="hidden md:block"><a href="#features" class="font-semibold text-black hover:text-emerald-light transition-colors">Keunggulan</a></li>
+      <li class="hidden md:block"><a href="#how-it-works" class="font-semibold text-black hover:text-emerald-light transition-colors">Alur Kerja</a></li>
+      <li><a routerLink="/auth/login" class="border border-emerald-dark text-emerald-dark font-semibold py-2 md:py-3 px-5 md:px-7 rounded inline-flex items-center justify-center transition-all hover:bg-emerald-dark hover:text-cream">Masuk Kasir</a></li>
+    </ul>
+  </nav>
+
+  <!-- Hero Section -->
+  <header class="flex flex-col md:flex-row items-center justify-between py-10 md:py-20 px-5 md:px-[5%] min-h-[80vh] gap-10 md:gap-16">
+    <div class="flex-1 text-center md:text-left">
+      <span class="inline-block py-1.5 px-4 bg-cream-dark text-emerald-dark rounded-full text-sm font-bold mb-6 border border-emerald-dark">Solusi Bisnis Modern</span>
+      <h1 class="text-4xl md:text-6xl font-bold text-black mb-6 tracking-tight leading-tight">Kasir Pintar dengan Ekosistem QRIS Sendiri.</h1>
+      <p class="text-lg text-black-soft mb-8">Sederhanakan alur pembayaran tokomu. TauPay menggabungkan Point of Sales yang cepat dengan sistem QR terintegrasi penuh. Tanpa delay, tanpa rekonsiliasi manual yang ribet.</p>
+      <div class="flex flex-col md:flex-row gap-4 justify-center md:justify-start">
+        <a routerLink="/auth/login" class="bg-emerald-dark text-cream border-2 border-emerald-dark font-semibold py-3 px-7 rounded inline-flex items-center justify-center transition-all hover:bg-black hover:border-black cursor-pointer">Coba Demo Wallet & Kasir</a>
+        <a href="#contact" class="bg-transparent text-black border-2 border-black font-semibold py-3 px-7 rounded inline-flex items-center justify-center transition-all hover:bg-black hover:text-cream cursor-pointer">Hubungi Tim Sales</a>
+      </div>
+    </div>
+    <div class="flex-1 flex justify-center w-full">
+      <div class="bg-black rounded-lg w-full max-w-[450px] shadow-2xl overflow-hidden">
+        <div class="bg-black-soft p-4 flex gap-2">
+          <span class="w-3 h-3 rounded-full bg-gray-600"></span>
+          <span class="w-3 h-3 rounded-full bg-gray-600"></span>
+          <span class="w-3 h-3 rounded-full bg-gray-600"></span>
+        </div>
+        <div class="p-8 text-[#A6E22E] font-mono text-base leading-relaxed">
+          <span class="text-[#66d9ef]">// Real-time Transaction Log</span><br>
+          <code>
+            &#123;<br>
+            &nbsp;&nbsp;"status": "PAID",<br>
+            &nbsp;&nbsp;"invoice": "TPY-88291A",<br>
+            &nbsp;&nbsp;"amount": 50000,<br>
+            &nbsp;&nbsp;"method": "QR_TAUPAY_ECOSYSTEM",<br>
+            &nbsp;&nbsp;"settlement": "instant",<br>
+            &nbsp;&nbsp;"timestamp": "2026-05-13T09:15:00Z"<br>
+            &#125;
+          </code>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Bento Features Section -->
+  <section id="features" class="py-20 px-5 md:px-[5%] bg-cream">
+    <div class="text-center mb-16 max-w-[600px] mx-auto">
+      <h2 class="text-3xl md:text-4xl font-bold text-emerald-dark mb-4 tracking-tight">Dirancang untuk Kecepatan Transaksi</h2>
+      <p class="text-lg text-black-soft">Fokus layani pelanggan, biarkan sistem kami yang urus pencatatannya.</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-[1200px] mx-auto">
+      <!-- Card 1: Wide -->
+      <div class="md:col-span-2 min-h-[250px] bg-black text-cream rounded-xl p-8 flex flex-col justify-end transition-transform hover:-translate-y-1">
+        <div>
+          <h3 class="text-2xl font-bold text-cream mb-4">Dashboard POS Super Cerdas</h3>
+          <p class="text-gray-400">Manajemen katalog produk, pantau stok, dan operasional kasir dalam satu antarmuka minimalis. Didesain untuk layar sentuh maupun keyboard, menjamin antrean pelanggan lebih cepat terurai.</p>
+        </div>
+      </div>
+
+      <!-- Card 2: Square -->
+      <div class="col-span-1 min-h-[250px] bg-cream text-black border-2 border-black rounded-xl p-8 flex flex-col justify-end transition-transform hover:-translate-y-1">
+        <h3 class="text-2xl font-bold mb-4">QR Dinamis</h3>
+        <p>Harga otomatis muncul di kode QR pelanggan. Tidak ada lagi typo atau salah transfer.</p>
+      </div>
+
+      <!-- Card 3: Square -->
+      <div class="col-span-1 min-h-[250px] bg-cream text-black border-2 border-black rounded-xl p-8 flex flex-col justify-end transition-transform hover:-translate-y-1">
+        <h3 class="text-2xl font-bold mb-4">Demo Wallet</h3>
+        <p>Simulasi alur pembayaran pakai TauPay Wallet sebelum go-live ke pelanggan nyata.</p>
+      </div>
+
+      <!-- Card 4: Wide -->
+      <div class="md:col-span-2 min-h-[250px] bg-emerald-dark text-cream rounded-xl p-8 flex flex-col justify-end transition-transform hover:-translate-y-1">
+        <div>
+          <h3 class="text-2xl font-bold text-cream mb-4">Anti-Rekonsiliasi Manual</h3>
+          <p class="text-cream-dark">Karena POS dan QR Payment berada di satu ekosistem tertutup, status pembayaran di layar kasir berubah ke "LUNAS" di detik yang sama saat pelanggan memasukkan PIN.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How it Works Section -->
+  <section id="how-it-works" class="py-24 px-5 md:px-[5%] bg-emerald-dark text-cream">
+    <div class="text-center mb-16 max-w-[600px] mx-auto">
+      <h2 class="text-3xl md:text-4xl font-bold text-cream tracking-tight">Transaksi Selesai dalam 3 Detik</h2>
+    </div>
+    <div class="flex flex-col md:flex-row justify-between items-center md:items-start max-w-[1000px] mx-auto relative gap-8">
+      <div class="flex-1 bg-white/5 p-8 rounded-lg border border-cream/10 w-full max-w-[400px]">
+        <div class="text-5xl font-bold text-cream-dark/50 mb-4 leading-none">01</div>
+        <h4 class="text-xl font-bold text-cream mb-2">Input Pesanan</h4>
+        <p class="text-cream-dark text-[0.95rem]">Kasir memilih produk di POS, sistem otomatis generate QR Code spesifik untuk transaksi tersebut.</p>
+      </div>
+      <div class="hidden md:block w-10 h-0.5 bg-cream-dark/30 mt-16"></div>
+      <div class="flex-1 bg-white/5 p-8 rounded-lg border border-cream/10 w-full max-w-[400px]">
+        <div class="text-5xl font-bold text-cream-dark/50 mb-4 leading-none">02</div>
+        <h4 class="text-xl font-bold text-cream mb-2">Pelanggan Scan</h4>
+        <p class="text-cream-dark text-[0.95rem]">Pelanggan scan QR dengan aplikasi pembayaran. Nominal sudah sesuai, tinggal bayar.</p>
+      </div>
+      <div class="hidden md:block w-10 h-0.5 bg-cream-dark/30 mt-16"></div>
+      <div class="flex-1 bg-white/5 p-8 rounded-lg border border-cream/10 w-full max-w-[400px]">
+        <div class="text-5xl font-bold text-cream-dark/50 mb-4 leading-none">03</div>
+        <h4 class="text-xl font-bold text-cream mb-2">Auto Verifikasi</h4>
+        <p class="text-cream-dark text-[0.95rem]">Sistem langsung memvalidasi pembayaran dan mencetak struk tanpa campur tangan kasir.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Bottom CTA -->
+  <section class="py-24 px-5 md:px-[5%] text-center bg-cream border-b-2 border-black">
+    <h2 class="text-3xl md:text-4xl font-bold text-black mb-4 tracking-tight">Siap Modernisasi Kasir Tokomu?</h2>
+    <p class="text-xl text-black-soft mb-10">Coba langsung ekosistem TauPay dan rasakan bedanya.</p>
+    <a routerLink="/auth/login" class="bg-emerald-dark text-cream border-2 border-emerald-dark font-semibold py-4 px-10 rounded inline-flex items-center justify-center transition-all hover:bg-black hover:border-black text-lg cursor-pointer">Mulai Demo Sekarang</a>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-black text-cream py-16 px-5 md:px-[5%] pb-8">
+    <div class="flex flex-col md:flex-row justify-between items-center mb-12 max-w-[1200px] mx-auto border-b border-gray-800 pb-8 gap-8 text-center md:text-left">
+      <div>
+        <h3 class="text-emerald-dark text-3xl font-bold mb-2">TauPay_</h3>
+        <p class="text-gray-400 text-sm">POS & Pembayaran Terpadu.</p>
+      </div>
+      <div class="flex flex-col md:flex-row gap-4 md:gap-8">
+        <a href="#features" class="text-cream hover:text-emerald-light font-medium transition-colors">Keunggulan</a>
+        <a href="#how-it-works" class="text-cream hover:text-emerald-light font-medium transition-colors">Alur Kerja</a>
+        <a routerLink="/auth/login" class="text-emerald-dark font-bold hover:text-emerald-light transition-colors">Super Admin</a>
+      </div>
+    </div>
+    <div class="text-center text-gray-500 text-sm">
+      <p>&copy; 2026 TauPay. Dibuat dengan presisi.</p>
+    </div>
+  </footer>
+</div>

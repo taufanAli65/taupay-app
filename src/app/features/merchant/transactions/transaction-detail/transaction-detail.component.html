@@ -1,0 +1,100 @@
+<div class="animate-fade-in max-w-5xl">
+  <div class="flex justify-between items-center mb-8">
+    <div>
+      <h1 class="text-3xl font-bold text-black mb-1 tracking-tight">Transaction</h1>
+      <p class="text-gray-500 font-mono text-sm">{{ trxId }}</p>
+    </div>
+    <a routerLink="/merchant/transactions/new" class="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-semibold py-2 px-5 rounded-md transition-all shadow-sm">
+      New Transaction
+    </a>
+  </div>
+
+  <!-- Status Banner -->
+  <div class="flex items-center gap-3 p-4 rounded-xl border-2 mb-8" 
+       [class.bg-yellow-50]="status() === 'waiting'" [class.border-yellow-400]="status() === 'waiting'" [class.text-yellow-700]="status() === 'waiting'"
+       [class.bg-green-50]="status() === 'paid'" [class.border-green-500]="status() === 'paid'" [class.text-green-700]="status() === 'paid'"
+       [class.bg-red-50]="status() === 'failed'" [class.border-red-500]="status() === 'failed'" [class.text-red-700]="status() === 'failed'">
+    <app-icon [name]="status() === 'paid' ? 'check-circle' : (status() === 'failed' ? 'x-circle' : 'clock')" class="w-5 h-5"></app-icon>
+    <span class="font-bold text-lg">{{ statusLabel }}</span>
+    @if (status() === 'waiting') {
+      <span class="text-sm ml-2 font-medium opacity-80">Waiting for payment...</span>
+    }
+  </div>
+
+  @if (transaction(); as t) {
+    <div class="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6">
+      <!-- Items -->
+      <div class="bg-white border border-cream-dark rounded-xl p-6 shadow-sm">
+        <h3 class="text-xl font-bold mb-6">Items</h3>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-cream/50 text-gray-500 text-xs uppercase tracking-wider border-y border-cream-dark">
+                <th class="py-3 px-4 font-semibold">Product</th>
+                <th class="py-3 px-4 font-semibold">Qty</th>
+                <th class="py-3 px-4 font-semibold">Price</th>
+                <th class="py-3 px-4 font-semibold text-right">Subtotal</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-cream-dark">
+              @for (item of t.products; track item.product_id) {
+                <tr class="hover:bg-cream/20 transition-colors">
+                  <td class="py-3 px-4 font-bold text-sm">{{ item.name }}</td>
+                  <td class="py-3 px-4 text-sm">× {{ item.quantity }}</td>
+                  <td class="py-3 px-4 text-sm">{{ item.price | currencyIdr }}</td>
+                  <td class="py-3 px-4 font-extrabold text-sm text-right">{{ (item.price * item.quantity) | currencyIdr }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Summary + Actions -->
+      <div class="flex flex-col gap-6">
+        <div class="bg-white border border-cream-dark rounded-xl p-6 shadow-sm">
+          <h4 class="text-lg font-bold mb-4">Summary</h4>
+          <div class="flex justify-between items-center py-2">
+            <span class="text-gray-500 text-sm font-medium">TRX ID</span>
+            <span class="text-sm font-mono font-semibold">{{ t.trx_id }}</span>
+          </div>
+          <div class="flex justify-between items-center py-2">
+            <span class="text-gray-500 text-sm font-medium">Date</span>
+            <span class="text-sm font-semibold">{{ t.created_at | date:'medium' }}</span>
+          </div>
+          <div class="h-px bg-cream-dark w-full my-3"></div>
+          <div class="flex justify-between items-center py-2">
+            <span class="text-gray-500 font-bold uppercase tracking-wider text-sm">Total</span>
+            <span class="font-extrabold text-2xl text-emerald-dark">{{ t.total | currencyIdr }}</span>
+          </div>
+
+          <!-- QR Code for Wallet App -->
+          <div class="h-px bg-cream-dark w-full my-4"></div>
+          <div class="flex flex-col items-center justify-center p-4 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+            <qrcode [qrdata]="t.trx_id" [width]="200" [errorCorrectionLevel]="'M'"></qrcode>
+            <span class="text-xs text-gray-500 mt-2 font-medium">Scan with Wallet App to pay</span>
+          </div>
+        </div>
+
+        <!-- Demo: Simulate Payment Callback -->
+        <div class="bg-yellow-50 border-2 border-yellow-400 rounded-xl p-6 shadow-sm">
+          <h4 class="text-lg font-bold mb-2 text-yellow-800 flex items-center gap-2">
+            <app-icon name="bolt" class="w-4 h-4"></app-icon>
+            Demo: Simulate Payment
+          </h4>
+          <p class="text-yellow-700/80 text-sm mb-4 font-medium">Simulate the payment gateway callback for testing.</p>
+          <button class="w-full bg-yellow-400 hover:bg-yellow-500 text-yellow-900 font-bold py-3 px-4 rounded-lg transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed" [disabled]="paying() || status() === 'paid'" (click)="simulatePay()">
+            @if (paying()) { 
+              <span class="inline-block w-4 h-4 border-2 border-yellow-900/30 border-t-yellow-900 rounded-full animate-spin mr-2 align-middle"></span> Processing... 
+            } @else { 
+              <span class="inline-flex items-center gap-2">
+                <app-icon name="check-circle" class="w-4 h-4"></app-icon>
+                Simulate Payment
+              </span>
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

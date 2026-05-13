@@ -1,0 +1,76 @@
+<div class="animate-fade-in max-w-7xl">
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-black mb-1 tracking-tight">Admin Dashboard</h1>
+    <p class="text-black-soft">TauPay ecosystem overview</p>
+  </div>
+
+  <!-- Stats -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div class="bg-white border-l-4 border-blue-500 rounded-xl p-6 shadow-sm relative overflow-hidden">
+      <p class="text-gray-500 text-xs font-bold uppercase tracking-wider mb-1">Total Users</p>
+      <p class="text-3xl font-extrabold text-black">{{ userCount() }}</p>
+      <app-icon name="users" class="absolute right-4 top-1/2 -translate-y-1/2 w-9 h-9 text-blue-500/20"></app-icon>
+    </div>
+    <div class="bg-white border-l-4 border-emerald-dark rounded-xl p-6 shadow-sm relative overflow-hidden">
+      <p class="text-gray-500 text-xs font-bold uppercase tracking-wider mb-1">Total Merchants</p>
+      <p class="text-3xl font-extrabold text-black">{{ merchantCount() }}</p>
+      <app-icon name="store" class="absolute right-4 top-1/2 -translate-y-1/2 w-9 h-9 text-emerald-500/20"></app-icon>
+    </div>
+    <div class="bg-white border-l-4 border-green-500 rounded-xl p-6 shadow-sm relative overflow-hidden">
+      <p class="text-gray-500 text-xs font-bold uppercase tracking-wider mb-1">Total Products</p>
+      <p class="text-3xl font-extrabold text-black">{{ productCount() }}</p>
+      <app-icon name="box" class="absolute right-4 top-1/2 -translate-y-1/2 w-9 h-9 text-green-500/20"></app-icon>
+    </div>
+    <div class="bg-white border-l-4 border-yellow-500 rounded-xl p-6 shadow-sm relative overflow-hidden">
+      <p class="text-gray-500 text-xs font-bold uppercase tracking-wider mb-1">SSE Monitor</p>
+      <p class="text-lg font-bold text-black mt-2 flex items-center gap-2">
+        <span class="inline-flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-yellow-500 animate-pulse"></span>
+          Live
+        </span>
+      </p>
+      <app-icon name="activity" class="absolute right-4 top-1/2 -translate-y-1/2 w-9 h-9 text-yellow-500/20"></app-icon>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <h3 class="text-xl font-bold mb-4">Quick Actions</h3>
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <a routerLink="/admin/users" class="flex items-center gap-4 p-5 bg-white border border-cream-dark rounded-xl shadow-sm hover:border-emerald-dark hover:shadow-md transition-all group">
+      <div class="w-11 h-11 rounded-xl bg-emerald-dark/10 flex items-center justify-center group-hover:scale-105 transition-transform">
+        <app-icon name="users" class="w-5 h-5 text-emerald-dark"></app-icon>
+      </div>
+      <div>
+        <div class="font-bold text-black">Manage Users</div>
+        <div class="text-gray-500 text-xs mt-0.5">View, activate or deactivate users</div>
+      </div>
+    </a>
+    <a routerLink="/admin/merchants" class="flex items-center gap-4 p-5 bg-white border border-cream-dark rounded-xl shadow-sm hover:border-emerald-dark hover:shadow-md transition-all group">
+      <div class="w-11 h-11 rounded-xl bg-emerald-dark/10 flex items-center justify-center group-hover:scale-105 transition-transform">
+        <app-icon name="store" class="w-5 h-5 text-emerald-dark"></app-icon>
+      </div>
+      <div>
+        <div class="font-bold text-black">Manage Merchants</div>
+        <div class="text-gray-500 text-xs mt-0.5">Review and manage merchant accounts</div>
+      </div>
+    </a>
+    <a routerLink="/admin/products" class="flex items-center gap-4 p-5 bg-white border border-cream-dark rounded-xl shadow-sm hover:border-emerald-dark hover:shadow-md transition-all group">
+      <div class="w-11 h-11 rounded-xl bg-emerald-dark/10 flex items-center justify-center group-hover:scale-105 transition-transform">
+        <app-icon name="box" class="w-5 h-5 text-emerald-dark"></app-icon>
+      </div>
+      <div>
+        <div class="font-bold text-black">View Products</div>
+        <div class="text-gray-500 text-xs mt-0.5">Monitor product catalog across merchants</div>
+      </div>
+    </a>
+    <a routerLink="/admin/transactions" class="flex items-center gap-4 p-5 bg-yellow-50 border border-yellow-200 rounded-xl shadow-sm hover:border-yellow-400 hover:shadow-md transition-all group">
+      <div class="w-11 h-11 rounded-xl bg-yellow-200/60 flex items-center justify-center group-hover:scale-105 transition-transform">
+        <app-icon name="activity" class="w-5 h-5 text-yellow-800"></app-icon>
+      </div>
+      <div>
+        <div class="font-bold text-yellow-900">Transaction Monitor</div>
+        <div class="text-yellow-700/80 text-xs mt-0.5">Live SSE stream for transactions</div>
+      </div>
+    </a>
+  </div>
+</div>
