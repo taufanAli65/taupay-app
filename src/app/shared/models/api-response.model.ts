@@ -1,6 +1,8 @@
 export interface Pagination {
   size: number;
   page: number;
+  totalElements: number;
+  totalPages: number;
 }
 
 export interface ApiResponse<T> {

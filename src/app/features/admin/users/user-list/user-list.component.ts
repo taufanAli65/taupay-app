@@ -1,42 +1,50 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { AdminUserService } from '@features/admin/services/admin-user.service';
+import { AdminUserStore } from '@features/admin/state/admin-user.store';
+
 import { UserProfile } from '@shared/models/user.model';
-import { PaginationComponent } from '@shared/components/pagination/pagination.component';
-import { ToastService } from '@shared/components/toast/toast.service';
+import { DataTableComponent } from '@shared/components/data-table/data-table.component';
+import { TableColumn, TableFilter } from '@shared/components/data-table/data-table.model';
 
 @Component({
   selector: 'app-admin-user-list',
   standalone: true,
-  imports: [RouterLink, CommonModule, PaginationComponent],
+  imports: [RouterLink, CommonModule, DataTableComponent],
   templateUrl: './user-list.component.html'
 })
 export class AdminUserListComponent implements OnInit {
-  private userService = inject(AdminUserService);
-  private toast = inject(ToastService);
-  users = signal<UserProfile[]>([]);
-  currentPage = signal(0);
-  totalPages = signal(1);
+  readonly store = inject(AdminUserStore);
+
+  columns: TableColumn[] = [
+    { key: 'user', label: 'User', custom: true },
+    { key: 'email', label: 'Email' },
+    { key: 'address', label: 'Address' },
+    { key: 'birthDate', label: 'Birth Date' },
+    { key: 'status', label: 'Status', custom: true },
+    { key: 'actions', label: 'Actions', className: 'text-right', custom: true }
+  ];
+
+  userFilters: TableFilter[] = [
+    {
+      key: 'isActive',
+      label: 'Status',
+      type: 'select',
+      options: [
+        { label: 'All Status', value: '' },
+        { label: 'Active', value: 'true' },
+        { label: 'Inactive', value: 'false' }
+      ]
+    }
+  ];
 
   initials(u: UserProfile): string {
     return ((u.firstName?.[0] ?? '') + (u.lastName?.[0] ?? '')).toUpperCase() || '?';
   }
 
-  ngOnInit(): void { this.loadPage(0); }
-
-  loadPage(page: number): void {
-    this.userService.getAll(page, 10).subscribe(r => {
-      this.users.set(r.data ?? []);
-      this.currentPage.set(r.pagination?.page ?? page);
-    });
-  }
-
-  toggle(u: UserProfile, activate: boolean): void {
-    const call = activate ? this.userService.activate(u.id) : this.userService.deactivate(u.id);
-    call.subscribe(() => {
-      this.toast.show(`User ${activate ? 'activated' : 'deactivated'}!`, 'success');
-      this.loadPage(this.currentPage());
-    });
+  ngOnInit(): void {
+    if (this.store.users().length === 0) {
+      this.store.loadPage(0);
+    }
   }
 }

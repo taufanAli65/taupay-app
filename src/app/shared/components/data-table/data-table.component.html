@@ -1,0 +1,86 @@
+<div class="bg-white border border-cream-dark rounded-xl p-0 shadow-sm overflow-hidden relative">
+
+  @if (showSearch || filters.length > 0) {
+    <div class="p-4 border-b border-cream-dark bg-white flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div class="flex flex-wrap items-center gap-3">
+        @for (f of filters; track f.key) {
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">{{ f.label }}:</span>
+            @if (f.type === 'select') {
+              <select 
+                [ngModel]="activeFilters[f.key]"
+                (ngModelChange)="onFilterChange(f.key, $event)"
+                class="bg-cream/30 border border-cream-dark rounded-lg py-1.5 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-light transition-all min-w-[120px]">
+                @for (opt of f.options; track opt.value) {
+                  <option [value]="opt.value">{{ opt.label }}</option>
+                }
+              </select>
+            }
+          </div>
+        }
+      </div>
+
+      @if (showSearch) {
+        <div class="relative max-w-sm w-full">
+          <input 
+            type="text" 
+            [ngModel]="searchQuery"
+            (ngModelChange)="onSearchChange($event)"
+            [placeholder]="searchPlaceholder" 
+            class="w-full bg-white border border-cream-dark rounded-xl py-2 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-light transition-all shadow-sm"
+          >
+        </div>
+      }
+    </div>
+  }
+
+  @if (loading) {
+    <div class="absolute inset-0 bg-white/50 backdrop-blur-[1px] flex items-center justify-center z-10">
+      <div class="w-8 h-8 border-4 border-emerald-light border-t-transparent rounded-full animate-spin"></div>
+    </div>
+  }
+
+  <div class="overflow-x-auto">
+    <table class="w-full text-left border-collapse">
+      <thead>
+        <tr class="bg-cream/50 text-gray-500 text-xs uppercase tracking-wider border-b border-cream-dark">
+          @for (col of columns; track col.key) {
+            <th class="py-4 px-6 font-semibold" [class]="col.className">
+              {{ col.label }}
+            </th>
+          }
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-cream-dark">
+        @for (item of data; track item.id || $index) {
+          <tr class="hover:bg-cream/20 transition-colors group">
+            @for (col of columns; track col.key) {
+              <td class="py-4 px-6" [class]="col.className">
+                @if (col.custom && customTemplates[col.key]) {
+                  <ng-container [ngTemplateOutlet]="customTemplates[col.key]" [ngTemplateOutletContext]="{ $implicit: item }"></ng-container>
+                } @else {
+                  <span class="text-sm font-medium text-black-soft">{{ item[col.key] }}</span>
+                }
+              </td>
+            }
+          </tr>
+        } @empty {
+          <tr>
+            <td [attr.colspan]="columns.length" class="py-12 text-center text-gray-400 font-medium">
+              No data available.
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  @if (totalPages > 0) {
+    <div class="p-4 border-t border-cream-dark bg-cream/20 flex flex-col md:flex-row items-center justify-between gap-4">
+      <div class="text-sm text-gray-500 font-medium">
+        Total <span class="text-black font-bold">{{ totalElements }}</span> data found
+      </div>
+      <app-pagination [currentPage]="currentPage" [totalPages]="totalPages" (pageChange)="onPageChange($event)" />
+    </div>
+  }
+</div>
