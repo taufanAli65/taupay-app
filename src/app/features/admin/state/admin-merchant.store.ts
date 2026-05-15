@@ -85,23 +85,67 @@ export class AdminMerchantStore {
   }
 
   toggleStatus(merchant: MerchantProfile, activate: boolean) {
-    const previousMerchants = [...this.merchants()];
-    const updatedMerchants = previousMerchants.map(m => 
+    const previousState = {
+      merchants: [...this.merchants()],
+      totalElements: this.totalElements(),
+      totalPages: this.totalPages(),
+      currentPage: this.currentPage()
+    };
+    const updatedMerchants = previousState.merchants.map(m =>
       m.id === merchant.id ? { ...m, active: activate } : m
     );
-    
-    this.patchState({ merchants: updatedMerchants });
+    const filteredMerchants = updatedMerchants.filter(m => this.matchesActiveFilter(m.active));
+    const removedByFilter = filteredMerchants.length !== updatedMerchants.length;
+    const nextTotalElements = removedByFilter
+      ? Math.max(0, previousState.totalElements - 1)
+      : previousState.totalElements;
+    const nextTotalPages = this.getTotalPages(nextTotalElements);
+
+    this.patchState({
+      merchants: filteredMerchants,
+      totalElements: nextTotalElements,
+      totalPages: nextTotalPages
+    });
 
     const call = activate ? this.merchantService.activate(merchant.id) : this.merchantService.deactivate(merchant.id);
     call.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.toast.show(`Merchant ${activate ? 'activated' : 'deactivated'}!`, 'success');
+        const targetPage = Math.min(previousState.currentPage, Math.max(0, nextTotalPages - 1));
+        this.loadPage(targetPage);
       },
       error: () => {
-        this.patchState({ merchants: previousMerchants });
+        this.patchState({
+          merchants: previousState.merchants,
+          totalElements: previousState.totalElements,
+          totalPages: previousState.totalPages,
+          currentPage: previousState.currentPage
+        });
         this.toast.show('Failed to update merchant status', 'danger');
       }
     });
+  }
+
+  private matchesActiveFilter(isActive: boolean): boolean {
+    const isActiveFilter = this.activeFilters()?.['isActive'];
+
+    if (isActiveFilter === '' || isActiveFilter === null || isActiveFilter === undefined) {
+      return true;
+    }
+
+    if (isActiveFilter === true || isActiveFilter === 'true') {
+      return isActive;
+    }
+
+    if (isActiveFilter === false || isActiveFilter === 'false') {
+      return !isActive;
+    }
+
+    return true;
+  }
+
+  private getTotalPages(totalElements: number): number {
+    return Math.max(1, Math.ceil(totalElements / 10));
   }
 
   private patchState(partial: Partial<AdminMerchantState>) {
