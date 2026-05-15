@@ -1,64 +1,81 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { AdminMerchantService } from '@features/admin/services/admin-merchant.service';
+import { AdminCategoryStore } from '@features/admin/state/admin-category.store';
 import { MerchantCategory } from '@shared/models/merchant.model';
-import { ToastService } from '@shared/components/toast/toast.service';
 import { IconComponent } from '@shared/components/icon/icon.component';
+import { DataTableComponent } from '@shared/components/data-table/data-table.component';
+import { TableColumn } from '@shared/components/data-table/data-table.model';
+import { ModalComponent } from '@shared/components/modal/modal.component';
 
 @Component({
   selector: 'app-merchant-category',
   standalone: true,
-  imports: [CommonModule, FormsModule, IconComponent],
+  imports: [CommonModule, FormsModule, IconComponent, DataTableComponent, ModalComponent],
   templateUrl: './merchant-category.component.html'
 })
 export class MerchantCategoryComponent implements OnInit {
-  private merchantService = inject(AdminMerchantService);
-  private toast = inject(ToastService);
-  categories = signal<MerchantCategory[]>([]);
-  creating = signal(false);
+  readonly store = inject(AdminCategoryStore);
+  
+  isEditing = signal(false);
   editingId = signal<string | null>(null);
-  newName = '';
-  editName = '';
+  categoryName = signal('');
 
-  ngOnInit(): void { this.load(); }
+  modalType = signal<'add' | 'edit' | 'delete' | null>(null);
+  selectedCategory = signal<MerchantCategory | null>(null);
 
-  load(): void {
-    // Load from public endpoint
+  columns: TableColumn[] = [
+    { key: 'name', label: 'Category Name', custom: true },
+    { key: 'id', label: 'ID', className: 'font-mono text-[10px] opacity-50 uppercase' },
+    { key: 'actions', label: 'Actions', className: 'text-right', custom: true }
+  ];
+
+  ngOnInit(): void {
+    this.store.loadCategories();
   }
 
-  createCategory(): void {
-    if (!this.newName.trim()) return;
-    this.creating.set(true);
-    this.merchantService.createCategory(this.newName.trim()).subscribe({
-      next: r => {
-        this.categories.update(c => [...c, r.data]);
-        this.newName = '';
-        this.toast.show('Category created!', 'success');
-        this.creating.set(false);
-      },
-      error: () => this.creating.set(false)
-    });
+  onFormSubmit(): void {
+    if (!this.categoryName().trim()) return;
+    this.modalType.set(this.isEditing() ? 'edit' : 'add');
   }
 
   startEdit(cat: MerchantCategory): void {
+    this.isEditing.set(true);
     this.editingId.set(cat.id);
-    this.editName = cat.name;
+    this.categoryName.set(cat.name);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  saveEdit(id: string): void {
-    this.merchantService.updateCategory(id, this.editName).subscribe(() => {
-      this.categories.update(c => c.map(x => x.id === id ? { ...x, name: this.editName } : x));
-      this.editingId.set(null);
-      this.toast.show('Category updated!', 'success');
-    });
+  cancelEdit(): void {
+    this.isEditing.set(false);
+    this.editingId.set(null);
+    this.categoryName.set('');
   }
 
-  deleteCategory(id: string): void {
-    if (!confirm('Delete this category?')) return;
-    this.merchantService.deleteCategory(id).subscribe(() => {
-      this.categories.update(c => c.filter(x => x.id !== id));
-      this.toast.show('Category deleted!', 'success');
-    });
+  triggerDelete(cat: MerchantCategory): void {
+    this.selectedCategory.set(cat);
+    this.modalType.set('delete');
+  }
+
+  handleConfirm(): void {
+    const type = this.modalType();
+    const name = this.categoryName().trim();
+
+    if (type === 'add') {
+      this.store.createCategory(name);
+      this.categoryName.set('');
+    } else if (type === 'edit' && this.editingId()) {
+      this.store.updateCategory(this.editingId()!, name);
+      this.cancelEdit();
+    } else if (type === 'delete' && this.selectedCategory()) {
+      this.store.deleteCategory(this.selectedCategory()!.id);
+    }
+
+    this.closeModal();
+  }
+
+  closeModal(): void {
+    this.modalType.set(null);
+    this.selectedCategory.set(null);
   }
 }
