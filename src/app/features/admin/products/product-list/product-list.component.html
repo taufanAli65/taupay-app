@@ -35,7 +35,7 @@
   <div class="flex items-center gap-3">
     <div class="w-10 h-10 rounded-lg bg-cream flex items-center justify-center overflow-hidden shrink-0 shadow-sm border border-cream-dark">
       @if (p.imageUrl) { 
-        <img [src]="p.imageUrl" class="w-full h-full object-cover"> 
+        <img [src]="p.imageUrl" [attr.alt]="p.name || ''" class="w-full h-full object-cover"> 
       } @else { 
         <app-icon name="box" class="w-4 h-4 text-emerald-dark/60"></app-icon> 
       }
