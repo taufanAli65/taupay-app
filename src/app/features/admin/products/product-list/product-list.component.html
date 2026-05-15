@@ -1,66 +1,113 @@
-<div class="animate-fade-in max-w-7xl">
+<div class="animate-fade-in w-full">
   <div class="mb-8">
     <h1 class="text-3xl font-bold text-black mb-1 tracking-tight">Products</h1>
-    <p class="text-black-soft">Monitor products across all merchants</p>
+    <p class="text-black-soft">Monitor and manage products across all merchants</p>
   </div>
 
-  <div class="bg-white border border-cream-dark rounded-xl p-0 shadow-sm overflow-hidden">
-    <div class="overflow-x-auto">
-      <table class="w-full text-left border-collapse">
-        <thead>
-          <tr class="bg-cream/50 text-gray-500 text-xs uppercase tracking-wider border-b border-cream-dark">
-            <th class="py-4 px-6 font-semibold">Product</th>
-            <th class="py-4 px-6 font-semibold">Merchant</th>
-            <th class="py-4 px-6 font-semibold">Category</th>
-            <th class="py-4 px-6 font-semibold">Price</th>
-            <th class="py-4 px-6 font-semibold">Stock</th>
-            <th class="py-4 px-6 font-semibold">Status</th>
-            <th class="py-4 px-6 font-semibold text-right">Actions</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-cream-dark">
-          @for (p of products(); track p.id) {
-            <tr class="hover:bg-cream/20 transition-colors group">
-              <td class="py-4 px-6">
-                <div class="flex items-center gap-3">
-                  <div class="w-10 h-10 rounded-lg bg-cream flex items-center justify-center overflow-hidden shrink-0 shadow-sm border border-cream-dark">
-                    @if (p.imageUrl) { <img [src]="p.imageUrl" class="w-full h-full object-cover"> }
-                    @else { <app-icon name="box" class="w-4 h-4 text-emerald-dark/60"></app-icon> }
-                  </div>
-                  <span class="font-bold text-sm truncate max-w-[200px] block">{{ p.name }}</span>
-                </div>
-              </td>
-              <td class="py-4 px-6 text-sm text-gray-500 font-medium truncate max-w-[150px]">{{ p.merchant.name || '—' }}</td>
-              <td class="py-4 px-6">
-                <span class="inline-block px-2.5 py-1 bg-blue-50 border border-blue-100 text-blue-700 rounded text-xs font-bold">{{ p.category.name || '—' }}</span>
-              </td>
-              <td class="py-4 px-6 font-extrabold text-sm">{{ p.price | currencyIdr }}</td>
-              <td class="py-4 px-6">
-                <span class="inline-block px-2 py-0.5 bg-gray-100 text-gray-700 font-mono font-bold text-xs rounded border border-gray-200">{{ p.stock }}</span>
-              </td>
-              <td class="py-4 px-6">
-                <span class="inline-block px-3 py-1 rounded-full text-xs font-bold"
-                      [class.bg-green-100]="p.isActive" [class.text-green-700]="p.isActive"
-                      [class.bg-red-100]="!p.isActive" [class.text-red-700]="!p.isActive">
-                  {{ p.isActive ? 'Active' : 'Inactive' }}
-                </span>
-              </td>
-              <td class="py-4 px-6">
-                <div class="flex justify-end">
-                  @if (p.isActive) {
-                    <button class="bg-red-50 hover:bg-red-100 text-red-600 font-bold py-1.5 px-3 rounded text-xs transition-all border border-red-200" (click)="toggle(p, false)">Deactivate</button>
-                  } @else {
-                    <button class="bg-green-50 hover:bg-green-100 text-green-700 font-bold py-1.5 px-3 rounded text-xs transition-all border border-green-200" (click)="toggle(p, true)">Activate</button>
-                  }
-                </div>
-              </td>
-            </tr>
-          }
-        </tbody>
-      </table>
+  <app-data-table 
+    [data]="store.products()" 
+    [columns]="columns"
+    [loading]="store.loading()"
+    [filters]="productFilters()"
+    [activeFilters]="store.activeFilters()"
+    [currentPage]="store.currentPage()"
+    [totalPages]="store.totalPages()"
+    [totalElements]="store.totalElements()"
+    [searchQuery]="store.searchQuery()"
+    searchPlaceholder="Search product by name..."
+    (search)="store.setSearchQuery($event)"
+    (filterChange)="store.setActiveFilters($event)"
+    (pageChange)="store.loadPage($event)"
+    [customTemplates]="{ 
+      product: productTpl, 
+      merchantName: merchantTpl, 
+      categoryName: categoryTpl, 
+      price: priceTpl, 
+      stock: stockTpl, 
+      status: statusTpl, 
+      actions: actionTpl 
+    }">
+  </app-data-table>
+</div>
+
+<!-- Template: Product Image & Name -->
+<ng-template #productTpl let-p>
+  <div class="flex items-center gap-3">
+    <div class="w-10 h-10 rounded-lg bg-cream flex items-center justify-center overflow-hidden shrink-0 shadow-sm border border-cream-dark">
+      @if (p.imageUrl) { 
+        <img [src]="p.imageUrl" class="w-full h-full object-cover"> 
+      } @else { 
+        <app-icon name="box" class="w-4 h-4 text-emerald-dark/60"></app-icon> 
+      }
     </div>
-    <div class="p-4 border-t border-cream-dark bg-cream/20 flex justify-end">
-      <app-pagination [currentPage]="currentPage()" [totalPages]="totalPages()" (pageChange)="loadPage($event)" />
+    <div class="min-w-0">
+      <span class="font-bold text-sm text-black truncate block max-w-[200px]">{{ p.name }}</span>
+      <span class="text-[10px] text-gray-400 font-mono">{{ p.id }}</span>
     </div>
   </div>
-</div>
+</ng-template>
+
+<!-- Template: Merchant -->
+<ng-template #merchantTpl let-p>
+  <span class="text-sm text-gray-600 font-bold truncate max-w-[150px]">{{ p.merchant.name }}</span>
+</ng-template>
+
+<!-- Template: Category -->
+<ng-template #categoryTpl let-p>
+  <span class="inline-block px-2.5 py-1 rounded text-[10px] font-extrabold uppercase tracking-wider border transition-colors"
+        [class.bg-blue-50]="p.category" [class.border-blue-100]="p.category" [class.text-blue-700]="p.category"
+        [class.bg-gray-100]="!p.category" [class.border-gray-200]="!p.category" [class.text-gray-500]="!p.category">
+    {{ p.category?.name || 'Uncategorized' }}
+  </span>
+</ng-template>
+
+<!-- Template: Price -->
+<ng-template #priceTpl let-p>
+  <span class="font-extrabold text-sm text-black">{{ p.price | currencyIdr }}</span>
+</ng-template>
+
+<!-- Template: Stock -->
+<ng-template #stockTpl let-p>
+  <span class="inline-block px-2 py-0.5 bg-gray-100 text-gray-700 font-mono font-bold text-xs rounded border border-gray-200">
+    {{ p.stock }}
+  </span>
+</ng-template>
+
+<!-- Template: Status Badge -->
+<ng-template #statusTpl let-p>
+  <span class="inline-block px-3 py-1 rounded-full text-xs font-bold"
+        [class.bg-green-100]="p.isActive" [class.text-green-700]="p.isActive"
+        [class.bg-red-100]="!p.isActive" [class.text-red-700]="!p.isActive">
+    {{ p.isActive ? 'Active' : 'Inactive' }}
+  </span>
+</ng-template>
+
+<!-- Template: Actions -->
+<ng-template #actionTpl let-p>
+  <div class="flex justify-end gap-2">
+    @if (p.isActive) {
+      <button class="bg-red-50 hover:bg-red-100 text-red-600 font-bold py-1.5 px-3 rounded text-xs transition-all border border-red-200" 
+              (click)="triggerToggle(p, false)">
+        Deactivate
+      </button>
+    } @else {
+      <button class="bg-green-50 hover:bg-green-100 text-green-700 font-bold py-1.5 px-3 rounded text-xs transition-all border border-green-200" 
+              (click)="triggerToggle(p, true)">
+        Activate
+      </button>
+    }
+  </div>
+</ng-template>
+
+<!-- Confirmation Modal -->
+<app-modal
+  *ngIf="showConfirmModal()"
+  [title]="targetAction() ? 'Activate Product?' : 'Deactivate Product?'"
+  [type]="targetAction() ? 'info' : 'warning'"
+  [confirmLabel]="targetAction() ? 'Yes, Activate' : 'Yes, Deactivate'"
+  (onConfirm)="confirmToggle()"
+  (onCancel)="closeModal()">
+  Are you sure you want to {{ targetAction() ? 'activate' : 'deactivate' }} product 
+  <span class="font-bold text-black">"{{ targetProduct()?.name }}"</span>? 
+  This will affect its visibility in the merchant's store.
+</app-modal>

@@ -1,39 +1,70 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { AdminProductService } from '@features/admin/services/admin-product.service';
+import { AdminProductStore } from '@features/admin/state/admin-product.store';
 import { Product } from '@shared/models/product.model';
 import { CurrencyIdrPipe } from '@shared/pipes/currency-idr.pipe';
-import { PaginationComponent } from '@shared/components/pagination/pagination.component';
-import { ToastService } from '@shared/components/toast/toast.service';
+import { DataTableComponent } from '@shared/components/data-table/data-table.component';
+import { TableColumn, TableFilter } from '@shared/components/data-table/data-table.model';
+import { ModalComponent } from '@shared/components/modal/modal.component';
 import { IconComponent } from '@shared/components/icon/icon.component';
 
 @Component({
   selector: 'app-admin-product-list',
   standalone: true,
-  imports: [CommonModule, CurrencyIdrPipe, PaginationComponent, IconComponent],
+  imports: [CommonModule, CurrencyIdrPipe, DataTableComponent, ModalComponent, IconComponent],
   templateUrl: './product-list.component.html'
 })
 export class AdminProductListComponent implements OnInit {
-  private productService = inject(AdminProductService);
-  private toast = inject(ToastService);
-  products = signal<Product[]>([]);
-  currentPage = signal(0);
-  totalPages = signal(1);
+  readonly store = inject(AdminProductStore);
 
-  ngOnInit(): void { this.loadPage(0); }
+  showConfirmModal = signal(false);
+  targetProduct = signal<Product | null>(null);
+  targetAction = signal<boolean>(false);
 
-  loadPage(page: number): void {
-    this.productService.getAll(page, 10).subscribe(r => {
-      this.products.set(r.data ?? []);
-      this.currentPage.set(r.pagination?.page ?? page);
-    });
+  columns: TableColumn[] = [
+    { key: 'product', label: 'Product', custom: true },
+    { key: 'merchantName', label: 'Merchant', custom: true },
+    { key: 'categoryName', label: 'Category', custom: true },
+    { key: 'price', label: 'Price', custom: true },
+    { key: 'stock', label: 'Stock', custom: true },
+    { key: 'status', label: 'Status', custom: true },
+    { key: 'actions', label: 'Actions', className: 'text-right', custom: true }
+  ];
+
+  productFilters = computed<TableFilter[]>(() => [
+    {
+      key: 'isActive',
+      label: 'Status',
+      type: 'select',
+      options: [
+        { label: 'All Status', value: '' },
+        { label: 'Active', value: 'true' },
+        { label: 'Inactive', value: 'false' }
+      ]
+    }
+  ]);
+
+  ngOnInit(): void {
+    this.store.loadPage(0);
+    this.store.loadInitialData();
   }
 
-  toggle(p: Product, activate: boolean): void {
-    const call = activate ? this.productService.activate(p.id) : this.productService.deactivate(p.id);
-    call.subscribe(() => {
-      this.toast.show(`Product ${activate ? 'activated' : 'deactivated'}!`, 'success');
-      this.loadPage(this.currentPage());
-    });
+  triggerToggle(p: Product, activate: boolean): void {
+    this.targetProduct.set(p);
+    this.targetAction.set(activate);
+    this.showConfirmModal.set(true);
+  }
+
+  confirmToggle(): void {
+    const p = this.targetProduct();
+    if (p) {
+      this.store.toggleStatus(p, this.targetAction());
+      this.closeModal();
+    }
+  }
+
+  closeModal(): void {
+    this.showConfirmModal.set(false);
+    this.targetProduct.set(null);
   }
 }
