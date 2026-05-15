@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from '@env';
 import { ApiResponse } from '@shared/models/api-response.model';
 import { MerchantProfile, MerchantCategory, CreateMerchantRequest, UpdateMerchantRequest } from '@shared/models/merchant.model';
@@ -9,8 +9,22 @@ export class AdminMerchantService {
   private http = inject(HttpClient);
   private base = `${environment.apiUrl}/api/v1/admin/merchant`;
 
-  getAll(page = 0, size = 10) {
-    return this.http.get<ApiResponse<MerchantProfile[]>>(`${this.base}?page=${page}&size=${size}`);
+  getAll(page = 0, size = 10, search = '', filters: { [key: string]: any } = {}) {
+    let params = `page=${page}&size=${size}`;
+    if (search) params += `&search=${search}`;
+    
+    Object.keys(filters).forEach(key => {
+      const val = filters[key];
+      if (val !== undefined && val !== null && val !== '') {
+        params += `&${key}=${val}`;
+      }
+    });
+
+    return this.http.get<ApiResponse<MerchantProfile[]>>(`${this.base}?${params}`);
+  }
+
+  getCategories() {
+    return this.http.get<ApiResponse<MerchantCategory[]>>(`${environment.apiUrl}/api/v1/merchant/category`);
   }
 
   getById(id: string) {
@@ -25,8 +39,8 @@ export class AdminMerchantService {
     return this.http.put<ApiResponse<MerchantProfile>>(`${this.base}/${id}`, body);
   }
 
-  activate(id: string)   { return this.http.patch<ApiResponse<void>>(`${this.base}/${id}/activate`, {}); }
-  deactivate(id: string) { return this.http.patch<ApiResponse<void>>(`${this.base}/${id}/deactivate`, {}); }
+  activate(id: string)   { return this.http.patch<ApiResponse<void>>(`${this.base}/${id}/activate`, null); }
+  deactivate(id: string) { return this.http.patch<ApiResponse<void>>(`${this.base}/${id}/deactivate`, null); }
 
   // Merchant categories
   createCategory(name: string) {

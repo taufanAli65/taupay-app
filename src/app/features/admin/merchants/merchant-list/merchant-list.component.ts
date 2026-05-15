@@ -1,38 +1,57 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, computed } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { AdminMerchantService } from '@features/admin/services/admin-merchant.service';
+import { AdminMerchantStore } from '@features/admin/state/admin-merchant.store';
 import { MerchantProfile } from '@shared/models/merchant.model';
-import { PaginationComponent } from '@shared/components/pagination/pagination.component';
-import { ToastService } from '@shared/components/toast/toast.service';
+import { DataTableComponent } from '@shared/components/data-table/data-table.component';
+import { TableColumn, TableFilter } from '@shared/components/data-table/data-table.model';
 
 @Component({
   selector: 'app-admin-merchant-list',
   standalone: true,
-  imports: [RouterLink, CommonModule, PaginationComponent],
+  imports: [RouterLink, CommonModule, DataTableComponent],
   templateUrl: './merchant-list.component.html'
 })
 export class AdminMerchantListComponent implements OnInit {
-  private merchantService = inject(AdminMerchantService);
-  private toast = inject(ToastService);
-  merchants = signal<MerchantProfile[]>([]);
-  currentPage = signal(0);
-  totalPages = signal(1);
+  readonly store = inject(AdminMerchantStore);
 
-  ngOnInit(): void { this.loadPage(0); }
+  columns: TableColumn[] = [
+    { key: 'merchant', label: 'Merchant', custom: true },
+    { key: 'email', label: 'Email' },
+    { key: 'categoryName', label: 'Category', custom: true },
+    { key: 'address', label: 'Address' },
+    { key: 'status', label: 'Status', custom: true },
+    { key: 'actions', label: 'Actions', className: 'text-right', custom: true }
+  ];
+  merchantFilters = computed<TableFilter[]>(() => [
+    {
+      key: 'categoryId',
+      label: 'Category',
+      type: 'select',
+      options: [
+        { label: 'All Category', value: '' },
+        ...this.store.categories().map(c => ({ label: c.name, value: c.id }))
+      ]
+    },
+    {
+      key: 'isActive',
+      label: 'Status',
+      type: 'select',
+      options: [
+        { label: 'All Status', value: '' },
+        { label: 'Active', value: 'true' },
+        { label: 'Inactive', value: 'false' }
+      ]
+    }
+  ]);
 
-  loadPage(page: number): void {
-    this.merchantService.getAll(page, 10).subscribe(r => {
-      this.merchants.set(r.data ?? []);
-      this.currentPage.set(r.pagination?.page ?? page);
-    });
-  }
 
-  toggle(m: MerchantProfile, activate: boolean): void {
-    const call = activate ? this.merchantService.activate(m.id) : this.merchantService.deactivate(m.id);
-    call.subscribe(() => {
-      this.toast.show(`Merchant ${activate ? 'activated' : 'deactivated'}!`, 'success');
-      this.loadPage(this.currentPage());
-    });
+  ngOnInit(): void {
+    if (this.store.merchants().length === 0) {
+      this.store.loadPage(0);
+    }
+    if (this.store.categories().length === 0) {
+      this.store.loadCategories();
+    }
   }
 }
