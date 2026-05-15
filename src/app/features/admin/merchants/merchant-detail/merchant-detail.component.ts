@@ -5,11 +5,15 @@ import { CommonModule } from '@angular/common';
 import { AdminMerchantService } from '@features/admin/services/admin-merchant.service';
 import { ToastService } from '@shared/components/toast/toast.service';
 import { MerchantCategory } from '@shared/models/merchant.model';
+import { Product } from '@shared/models/product.model';
+import { DataTableComponent } from '@shared/components/data-table/data-table.component';
+import { TableColumn } from '@shared/components/data-table/data-table.model';
+import { CurrencyIdrPipe } from '@shared/pipes/currency-idr.pipe';
 
 @Component({
   selector: 'app-admin-merchant-detail',
   standalone: true,
-  imports: [ReactiveFormsModule, CommonModule, RouterLink],
+  imports: [ReactiveFormsModule, CommonModule, RouterLink, DataTableComponent, CurrencyIdrPipe],
   templateUrl: './merchant-detail.component.html'
 })
 export class AdminMerchantDetailComponent implements OnInit {
@@ -24,6 +28,20 @@ export class AdminMerchantDetailComponent implements OnInit {
   categories = signal<MerchantCategory[]>([]);
   merchantId = '';
 
+  products = signal<Product[]>([]);
+  loadingProducts = signal(false);
+  currentPage = signal(0);
+  totalPages = signal(1);
+  totalElements = signal(0);
+
+  productColumns: TableColumn[] = [
+    { key: 'imageUrl', label: 'Image', custom: true },
+    { key: 'name', label: 'Product Name' },
+    { key: 'price', label: 'Price', custom: true },
+    { key: 'stock', label: 'Stock' },
+    { key: 'isActive', label: 'Status', custom: true }
+  ];
+
   form = this.fb.group({
     name: ['', Validators.required],
     categoryId: ['', Validators.required],
@@ -33,28 +51,70 @@ export class AdminMerchantDetailComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    // Load categories from public endpoint
+    this.merchantService.getCategories().subscribe(r => this.categories.set(r.data));
+
     const id = this.route.snapshot.paramMap.get('id');
     this.isNew = !id || id === 'new';
-    if (!this.isNew) {
-      this.merchantId = id!;
-      this.merchantService.getById(id!).subscribe(r => {
-        this.form.patchValue({ name: r.data.name, categoryId: r.data.categoryId, address: r.data.address });
+    if (!id || id === 'new') {
+      this.isNew = true;
+      const emailControl = this.form.get('email');
+      const passwordControl = this.form.get('password');
+
+      emailControl?.addValidators([Validators.required, Validators.email]);
+      passwordControl?.addValidators([Validators.required, Validators.minLength(8)]);
+      emailControl?.updateValueAndValidity();
+      passwordControl?.updateValueAndValidity();
+    } else {
+      this.isNew = false;
+      this.merchantId = id;
+      this.merchantService.getById(id).subscribe(r => {
+        this.form.patchValue({ 
+          name: r.data.name, 
+          categoryId: r.data.categoryId, 
+          address: r.data.address 
+        });
       });
-    }
-    if (this.isNew) {
-      this.form.get('email')?.addValidators([Validators.required, Validators.email]);
-      this.form.get('password')?.addValidators([Validators.required, Validators.minLength(8)]);
+      this.loadProducts(0);
     }
   }
 
+  loadProducts(page: number): void {
+    if (this.isNew) return;
+    this.loadingProducts.set(true);
+    this.merchantService.getMerchantProducts(this.merchantId, page, 10).subscribe({
+      next: r => {
+        this.products.set(r.data ?? []);
+        this.currentPage.set(r.pagination?.page ?? page);
+        this.totalPages.set(r.pagination?.totalPages ?? 1);
+        this.totalElements.set(r.pagination?.totalElements ?? 0);
+        this.loadingProducts.set(false);
+      },
+      error: () => this.loadingProducts.set(false)
+    });
+  }
+
   onSubmit(): void {
-    if (this.form.invalid) { this.form.markAllAsTouched(); return; }
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+
     this.saving.set(true);
     const v = this.form.value;
+    
     const call = this.isNew
-      ? this.merchantService.create({ name: v.name!, categoryId: v.categoryId!, address: v.address!, email: v.email!, password: v.password! })
-      : this.merchantService.update(this.merchantId, { name: v.name!, categoryId: v.categoryId!, address: v.address! });
+      ? this.merchantService.create({
+          name: v.name!,
+          categoryId: v.categoryId!,
+          address: v.address!,
+          email: v.email!,
+          password: v.password!
+        })
+      : this.merchantService.update(this.merchantId, {
+          name: v.name!,
+          categoryId: v.categoryId!,
+          address: v.address!
+        });
 
     call.subscribe({
       next: () => {
