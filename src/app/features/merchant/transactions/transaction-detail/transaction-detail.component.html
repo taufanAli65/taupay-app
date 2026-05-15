@@ -13,11 +13,14 @@
   <div class="flex items-center gap-3 p-4 rounded-xl border-2 mb-8" 
        [class.bg-yellow-50]="status() === 'waiting'" [class.border-yellow-400]="status() === 'waiting'" [class.text-yellow-700]="status() === 'waiting'"
        [class.bg-green-50]="status() === 'paid'" [class.border-green-500]="status() === 'paid'" [class.text-green-700]="status() === 'paid'"
-       [class.bg-red-50]="status() === 'failed'" [class.border-red-500]="status() === 'failed'" [class.text-red-700]="status() === 'failed'">
-    <app-icon [name]="status() === 'paid' ? 'check-circle' : (status() === 'failed' ? 'x-circle' : 'clock')" class="w-5 h-5"></app-icon>
+       [class.bg-red-50]="status() === 'failed'" [class.border-red-500]="status() === 'failed'" [class.text-red-700]="status() === 'failed'"
+       [class.bg-orange-50]="status() === 'expired'" [class.border-orange-400]="status() === 'expired'" [class.text-orange-700]="status() === 'expired'">
+    <app-icon [name]="status() === 'paid' ? 'check-circle' : (status() === 'waiting' ? 'clock' : 'x-circle')" class="w-5 h-5"></app-icon>
     <span class="font-bold text-lg">{{ statusLabel }}</span>
     @if (status() === 'waiting') {
       <span class="text-sm ml-2 font-medium opacity-80">Waiting for payment...</span>
+    } @else if (status() === 'expired') {
+      <span class="text-sm ml-2 font-medium opacity-80">The payment window has expired.</span>
     }
   </div>
 
@@ -83,7 +86,7 @@
             Demo: Simulate Payment
           </h4>
           <p class="text-yellow-700/80 text-sm mb-4 font-medium">Simulate the payment gateway callback for testing.</p>
-          <button class="w-full bg-yellow-400 hover:bg-yellow-500 text-yellow-900 font-bold py-3 px-4 rounded-lg transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed" [disabled]="paying() || status() === 'paid'" (click)="simulatePay()">
+          <button class="w-full bg-yellow-400 hover:bg-yellow-500 text-yellow-900 font-bold py-3 px-4 rounded-lg transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed" [disabled]="paying() || status() !== 'waiting'" (click)="simulatePay()">
             @if (paying()) { 
               <span class="inline-block w-4 h-4 border-2 border-yellow-900/30 border-t-yellow-900 rounded-full animate-spin mr-2 align-middle"></span> Processing... 
             } @else { 
@@ -95,6 +98,11 @@
           </button>
         </div>
       </div>
+    </div>
+  } @else {
+    <div class="bg-white border border-cream-dark rounded-xl p-8 shadow-sm text-center">
+      <h3 class="text-xl font-bold mb-2">Waiting For Live Status</h3>
+      <p class="text-gray-500">This page is listening for updates for {{ trxId }}, but the transaction details are not available locally.</p>
     </div>
   }
 </div>
