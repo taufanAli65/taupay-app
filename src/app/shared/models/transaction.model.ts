@@ -22,6 +22,14 @@ export interface Transaction {
   total: number;
 }
 
+export type TransactionTerminalStatus = 'PAID' | 'FAILED' | 'EXPIRED';
+
+export interface TransactionStatusEvent {
+  trx_id: string;
+  status: TransactionTerminalStatus;
+  total: number;
+}
+
 export interface TransactionHistoryItem {
   historyId?: string;
   trx_id?: string;

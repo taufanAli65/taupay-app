@@ -1,6 +1,6 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, PLATFORM_ID, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { CommonModule } from '@angular/common';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ProductService } from '@features/merchant/services/product.service';
 import { TransactionService } from '@features/merchant/services/transaction.service';
@@ -21,6 +21,7 @@ export class CreateTransactionComponent implements OnInit {
   private transactionService = inject(TransactionService);
   private router = inject(Router);
   private toast = inject(ToastService);
+  private platformId = inject(PLATFORM_ID);
 
   products = signal<Product[]>([]);
   cart = signal<CartItem[]>([]);
@@ -68,13 +69,10 @@ export class CreateTransactionComponent implements OnInit {
     }).subscribe({
       next: res => {
         this.toast.show('Transaction created!', 'success');
-        
-        // Save to localStorage for the Wallet Demo to "scan"
-        localStorage.setItem('taupay_pending_trx', JSON.stringify({
-          id: res.data.trx_id,
-          amount: this.total,
-          status: 'PENDING'
-        }));
+
+        if (isPlatformBrowser(this.platformId)) {
+          this.transactionService.savePendingTransaction(res.data);
+        }
 
         this.router.navigate(['/merchant/transactions', res.data.trx_id], { state: { transaction: res.data } });
       },
