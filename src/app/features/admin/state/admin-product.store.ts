@@ -52,6 +52,15 @@ export class AdminProductStore {
 
   private searchTimeout?: ReturnType<typeof setTimeout>;
 
+  constructor() {
+    this.destroyRef.onDestroy(() => {
+      if (this.searchTimeout) {
+        clearTimeout(this.searchTimeout);
+        this.searchTimeout = undefined;
+      }
+    });
+  }
+
   loadPage(page: number) {
     this.patchState({ loading: true });
     this.productService.getAll(page, 10, this.searchQuery(), this.activeFilters())
