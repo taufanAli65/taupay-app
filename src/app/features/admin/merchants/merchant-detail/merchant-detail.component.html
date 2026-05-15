@@ -82,7 +82,7 @@
 <ng-template #imgTpl let-p>
   <div class="w-12 h-12 rounded-lg bg-cream border border-cream-dark overflow-hidden flex items-center justify-center">
     @if (p.imageUrl) {
-      <img [src]="p.imageUrl" alt="Product" class="w-full h-full object-cover">
+      <img [src]="p.imageUrl" [attr.alt]="p.name || p.productName || p.title || ''" class="w-full h-full object-cover">
     } @else {
       <span class="text-xs text-gray-400 font-bold uppercase">No Pic</span>
     }
