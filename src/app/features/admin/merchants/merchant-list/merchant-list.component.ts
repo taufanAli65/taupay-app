@@ -47,9 +47,7 @@ export class AdminMerchantListComponent implements OnInit {
 
 
   ngOnInit(): void {
-    if (this.store.merchants().length === 0) {
-      this.store.loadPage(0);
-    }
+    this.store.loadPage(0);
     if (this.store.categories().length === 0) {
       this.store.loadCategories();
     }

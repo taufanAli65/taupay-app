@@ -26,15 +26,15 @@
     [customTemplates]="{ merchant: merchantTpl, categoryName: categoryTpl, status: statusTpl, actions: actionTpl }">
   </app-data-table>
 </div>
-
 <ng-template #merchantTpl let-m>
   <div class="flex items-center gap-3">
-    <div class="w-10 h-10 rounded-full text-white font-bold flex items-center justify-center text-sm shadow-sm" style="background:linear-gradient(135deg,#116A43,#0B422A)">
+    <div class="w-10 h-10 rounded-full bg-cream-dark text-black font-bold flex items-center justify-center text-sm group-hover:bg-emerald-dark group-hover:text-white transition-colors shadow-sm">
       {{ m.name.substring(0,2).toUpperCase() }}
     </div>
     <div class="font-bold text-sm text-black">{{ m.name }}</div>
   </div>
 </ng-template>
+
 
 <ng-template #categoryTpl let-m>
   <span class="inline-block px-2.5 py-1 bg-cream-dark text-black-soft rounded text-xs font-bold">

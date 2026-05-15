@@ -3,6 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from '@env';
 import { ApiResponse } from '@shared/models/api-response.model';
 import { MerchantProfile, MerchantCategory, CreateMerchantRequest, UpdateMerchantRequest } from '@shared/models/merchant.model';
+import { Product } from '@shared/models/product.model';
 
 @Injectable({ providedIn: 'root' })
 export class AdminMerchantService {
@@ -41,6 +42,10 @@ export class AdminMerchantService {
 
   activate(id: string)   { return this.http.patch<ApiResponse<void>>(`${this.base}/${id}/activate`, null); }
   deactivate(id: string) { return this.http.patch<ApiResponse<void>>(`${this.base}/${id}/deactivate`, null); }
+
+  getMerchantProducts(merchantId: string, page = 0, size = 10) {
+    return this.http.get<ApiResponse<Product[]>>(`${environment.apiUrl}/api/v1/admin/merchant/${merchantId}/products?page=${page}&size=${size}`);
+  }
 
   // Merchant categories
   createCategory(name: string) {

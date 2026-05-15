@@ -7,7 +7,7 @@ import { UserProfile } from '@shared/models/user.model';
 @Injectable({ providedIn: 'root' })
 export class AdminUserService {
   private http = inject(HttpClient);
-  private base = `${environment.apiUrl}/api/v1/user`;
+  private base = `${environment.apiUrl}/api/v1/admin/users`;
 
   getAll(page = 0, size = 10, search = '', filters: { [key: string]: any } = {}) {
     let params = `page=${page}&size=${size}`;

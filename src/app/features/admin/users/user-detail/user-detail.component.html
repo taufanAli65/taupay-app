@@ -1,4 +1,4 @@
-<div class="animate-fade-in max-w-3xl">
+<div class="animate-fade-in w-full">
   <div class="flex justify-between items-center mb-8">
     <div>
       <h1 class="text-3xl font-bold text-black mb-1 tracking-tight">User Detail</h1>
@@ -10,7 +10,7 @@
   </div>
 
   @if (user(); as u) {
-    <div class="bg-white border border-cream-dark rounded-xl p-8 shadow-sm">
+    <div class="bg-white border border-cream-dark rounded-xl p-8 shadow-sm max-w-3xl">
       <div class="flex items-center gap-6 mb-8">
         <div class="w-20 h-20 rounded-full bg-cream-dark text-black font-extrabold flex items-center justify-center text-2xl shadow-inner">{{ initials(u) }}</div>
         <div>
