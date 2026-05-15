@@ -110,7 +110,7 @@ export class AdminProductStore {
     call.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.toast.show(`Product ${activate ? 'activated' : 'deactivated'}!`, 'success');
-        this.loadPage(this.currentPage()); // Refresh to ensure everything is sync
+        this.loadPage(this.currentPage()); // Refresh to ensure everything is in sync
       },
       error: () => {
         this.patchState({ products: previous });
