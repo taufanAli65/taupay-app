@@ -24,8 +24,9 @@ export class AdminMerchantService {
     return this.http.get<ApiResponse<MerchantProfile[]>>(`${this.base}?${params}`);
   }
 
-  getCategories() {
-    return this.http.get<ApiResponse<MerchantCategory[]>>(`${environment.apiUrl}/api/v1/merchant/category`);
+  getCategories(search = '') {
+    const params = search ? `?search=${search}` : '';
+    return this.http.get<ApiResponse<MerchantCategory[]>>(`${environment.apiUrl}/api/v1/merchant/category${params}`);
   }
 
   getById(id: string) {

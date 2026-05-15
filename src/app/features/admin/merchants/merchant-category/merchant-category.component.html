@@ -1,65 +1,118 @@
-<div class="animate-fade-in max-w-7xl">
+<div class="animate-fade-in w-full">
   <div class="mb-8">
     <h1 class="text-3xl font-bold text-black mb-1 tracking-tight">Merchant Categories</h1>
     <p class="text-black-soft">Create and manage merchant business categories</p>
   </div>
 
-  <div class="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-6 items-start">
-    <!-- List -->
-    <div class="bg-white border border-cream-dark rounded-xl p-6 shadow-sm">
-      <h3 class="text-xl font-bold mb-6">All Categories</h3>
-      @if (categories().length === 0) {
-        <div class="text-center py-10 px-4 bg-cream/30 rounded-lg border border-cream-dark">
-          <div class="mx-auto w-12 h-12 rounded-full bg-cream flex items-center justify-center mb-3">
-            <app-icon name="tag" class="w-6 h-6 text-emerald-dark"></app-icon>
-          </div>
-          <p class="text-gray-500 text-sm font-bold">No categories yet</p>
-        </div>
-      } @else {
-        <div class="flex flex-col gap-3">
-          @for (cat of categories(); track cat.id) {
-            <div class="flex items-center justify-between p-4 bg-cream/30 rounded-lg border border-cream-dark hover:border-emerald-dark transition-colors group">
-              @if (editingId() === cat.id) {
-                <input type="text" class="bg-white border border-emerald-dark rounded px-3 py-1.5 text-black focus:outline-none focus:ring-1 focus:ring-emerald-dark transition-all flex-1 mr-3 max-w-[240px]" [(ngModel)]="editName">
-                <div class="flex gap-2 shrink-0">
-                  <button class="bg-green-100 hover:bg-green-200 text-green-700 font-bold py-1.5 px-3 rounded text-xs transition-all border border-green-200" (click)="saveEdit(cat.id)">Save</button>
-                  <button class="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-bold py-1.5 px-3 rounded text-xs transition-all shadow-sm" (click)="editingId.set(null)">Cancel</button>
-                </div>
-              } @else {
-                <div class="min-w-0 flex-1 pr-4">
-                  <div class="font-bold text-black truncate">{{ cat.name }}</div>
-                  <div class="text-gray-400 text-xs font-mono font-semibold truncate">{{ cat.id }}</div>
-                </div>
-                <div class="flex gap-2 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button class="w-8 h-8 flex items-center justify-center bg-white border border-gray-200 hover:bg-gray-50 text-gray-600 rounded shadow-sm transition-all" (click)="startEdit(cat)">
-                    <app-icon name="edit" class="w-4 h-4"></app-icon>
-                  </button>
-                  <button class="w-8 h-8 flex items-center justify-center bg-red-50 hover:bg-red-100 text-red-500 border border-red-200 rounded shadow-sm transition-all" (click)="deleteCategory(cat.id)">
-                    <app-icon name="trash" class="w-4 h-4"></app-icon>
-                  </button>
-                </div>
-              }
-            </div>
-          }
-        </div>
-      }
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+    <div class="lg:col-span-8 flex flex-col gap-6">
+      <app-data-table
+        [data]="store.categories()"
+        [columns]="columns"
+        [loading]="store.loading()"
+        [showSearch]="true"
+        [searchQuery]="store.searchQuery()"
+        [totalElements]="store.totalElements()"
+        searchPlaceholder="Search categories..."
+        (search)="store.setSearchQuery($event)"
+        [customTemplates]="{ name: nameTpl, actions: actionTpl }">
+      </app-data-table>
     </div>
 
-    <!-- Create -->
-    <div class="bg-white border border-cream-dark rounded-xl p-6 shadow-sm sticky top-24">
-      <h3 class="text-xl font-bold mb-4">Add Category</h3>
-      <div class="flex flex-col gap-1.5 mb-4">
-        <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">Category Name *</label>
-        <input type="text" class="w-full bg-cream border border-cream-dark rounded-md px-4 py-2.5 text-black focus:outline-none focus:border-emerald-dark focus:ring-1 focus:ring-emerald-dark transition-all" [(ngModel)]="newName" placeholder="e.g. Food & Beverage" />
-      </div>
-      <button class="w-full bg-emerald-dark hover:bg-black text-white font-bold py-3 px-4 rounded-lg transition-all disabled:opacity-50 shadow-md"
-        [disabled]="!newName.trim() || creating()" (click)="createCategory()">
-        @if (creating()) { 
-          <span class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2 align-middle"></span> Creating... 
-        } @else { 
-          Create Category 
-        }
-      </button>
+    <div class="lg:col-span-4 bg-white border border-cream-dark rounded-xl p-8 shadow-sm sticky top-24">
+      <h3 class="text-lg font-bold text-black mb-6">{{ isEditing() ? 'Edit Category' : 'Add New Category' }}</h3>
+      <form (ngSubmit)="onFormSubmit()" class="flex flex-col gap-5">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">Category Name *</label>
+          <input 
+            type="text" 
+            [(ngModel)]="categoryName" 
+            name="categoryName"
+            class="w-full bg-cream border border-cream-dark rounded-md px-4 py-2.5 text-black focus:outline-none focus:border-emerald-dark focus:ring-1 focus:ring-emerald-dark transition-all font-medium" 
+            placeholder="e.g. Food & Beverage" 
+            required
+          />
+        </div>
+        
+        <div class="flex flex-col gap-3 mt-2">
+          <button 
+            type="submit" 
+            class="w-full bg-emerald-dark hover:bg-black text-white font-bold py-3 px-4 rounded-lg transition-all disabled:opacity-50 shadow-md"
+            [disabled]="!categoryName().trim() || store.loading()">
+            {{ isEditing() ? 'Save Changes' : 'Create Category' }} 
+          </button>
+          
+          @if (isEditing()) {
+            <button 
+              type="button" 
+              (click)="cancelEdit()"
+              class="w-full bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-semibold py-2.5 px-4 rounded-lg transition-all text-sm">
+              Cancel Edit
+            </button>
+          }
+        </div>
+      </form>
     </div>
   </div>
 </div>
+
+<ng-template #nameTpl let-cat>
+  <div class="flex items-center gap-3">
+    <div class="w-8 h-8 rounded bg-cream flex items-center justify-center">
+      <app-icon name="tag" class="w-4 h-4 text-emerald-dark"></app-icon>
+    </div>
+    <span class="font-bold text-black">{{ cat.name }}</span>
+  </div>
+</ng-template>
+
+<ng-template #actionTpl let-cat>
+  <div class="flex justify-end gap-2">
+    <button 
+      (click)="startEdit(cat)"
+      class="w-8 h-8 flex items-center justify-center bg-white border border-gray-200 hover:bg-gray-50 text-gray-600 rounded shadow-sm transition-all" 
+      title="Edit">
+      <app-icon name="edit" class="w-3.5 h-3.5"></app-icon>
+    </button>
+    <button 
+      (click)="triggerDelete(cat)"
+      class="w-8 h-8 flex items-center justify-center bg-red-50 hover:bg-red-100 text-red-500 border border-red-200 rounded shadow-sm transition-all" 
+      title="Delete">
+      <app-icon name="trash" class="w-3.5 h-3.5"></app-icon>
+    </button>
+  </div>
+</ng-template>
+
+<!-- Confirmation Modals -->
+
+<!-- 1. Add Confirmation -->
+<app-modal 
+  *ngIf="modalType() === 'add'"
+  title="Create Category?"
+  type="info"
+  confirmLabel="Yes, Create"
+  (onConfirm)="handleConfirm()"
+  (onCancel)="closeModal()">
+  Are you sure you want to add <span class="font-bold text-black">"{{ categoryName() }}"</span> as a new merchant category?
+</app-modal>
+
+<!-- 2. Edit Confirmation -->
+<app-modal 
+  *ngIf="modalType() === 'edit'"
+  title="Save Changes?"
+  type="warning"
+  confirmLabel="Save Changes"
+  (onConfirm)="handleConfirm()"
+  (onCancel)="closeModal()">
+  Are you sure you want to update the category name to <span class="font-bold text-black">"{{ categoryName() }}"</span>?
+</app-modal>
+
+<!-- 3. Delete Confirmation -->
+<app-modal 
+  *ngIf="modalType() === 'delete'"
+  title="Delete Category?"
+  type="danger"
+  confirmLabel="Yes, Delete"
+  (onConfirm)="handleConfirm()"
+  (onCancel)="closeModal()">
+  Are you sure you want to delete <span class="font-bold text-black">"{{ selectedCategory()?.name }}"</span>? This action cannot be undone.
+</app-modal>
