@@ -1,0 +1,62 @@
+<div class="animate-fade-in max-w-3xl">
+  <div class="flex justify-between items-center mb-8">
+    <div>
+      <h1 class="text-3xl font-bold text-black mb-1 tracking-tight">User Detail</h1>
+      <p class="text-black-soft">View and manage user account</p>
+    </div>
+    <a routerLink="/admin/users" class="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-semibold py-2 px-4 rounded-md transition-all shadow-sm text-sm">
+      ← Back to Users
+    </a>
+  </div>
+
+  @if (user(); as u) {
+    <div class="bg-white border border-cream-dark rounded-xl p-8 shadow-sm">
+      <div class="flex items-center gap-6 mb-8">
+        <div class="w-20 h-20 rounded-full bg-cream-dark text-black font-extrabold flex items-center justify-center text-2xl shadow-inner">{{ initials(u) }}</div>
+        <div>
+          <h3 class="text-2xl font-bold text-black mb-1">{{ u.firstName }} {{ u.lastName }}</h3>
+          <p class="text-gray-500 text-sm mb-2 font-medium">{{ u.email }}</p>
+          <span class="inline-block px-3 py-1 rounded-full text-xs font-bold"
+                [class.bg-green-100]="u.isActive" [class.text-green-700]="u.isActive"
+                [class.bg-red-100]="!u.isActive" [class.text-red-700]="!u.isActive">
+            {{ u.isActive ? 'Active' : 'Inactive' }}
+          </span>
+        </div>
+      </div>
+
+      <div class="h-px bg-cream-dark w-full mb-8"></div>
+
+      <div class="flex flex-col gap-4">
+        <div class="flex justify-between items-center p-3 bg-cream/30 rounded-lg border border-cream/50">
+          <span class="text-gray-500 text-sm font-bold flex items-center gap-2">
+            <app-icon name="location" class="w-4 h-4"></app-icon>
+            Address
+          </span>
+          <span class="font-medium text-black">{{ u.address || '—' }}</span>
+        </div>
+        <div class="flex justify-between items-center p-3 bg-cream/30 rounded-lg border border-cream/50">
+          <span class="text-gray-500 text-sm font-bold flex items-center gap-2">
+            <app-icon name="calendar" class="w-4 h-4"></app-icon>
+            Birth Date
+          </span>
+          <span class="font-medium text-black">{{ u.birthDate || '—' }}</span>
+        </div>
+        <div class="flex justify-between items-center p-3 bg-cream/30 rounded-lg border border-cream/50">
+          <span class="text-gray-500 text-sm font-bold flex items-center gap-2">
+            <app-icon name="id-card" class="w-4 h-4"></app-icon>
+            User ID
+          </span>
+          <span class="text-xs font-mono font-semibold text-gray-400">{{ u.id }}</span>
+        </div>
+      </div>
+
+      <div class="mt-8 flex gap-3">
+        @if (u.isActive) {
+          <button class="bg-red-50 hover:bg-red-100 text-red-600 font-bold py-2.5 px-6 rounded-lg transition-all border border-red-200" (click)="toggle(false)">Deactivate User</button>
+        } @else {
+          <button class="bg-green-50 hover:bg-green-100 text-green-700 font-bold py-2.5 px-6 rounded-lg transition-all border border-green-200" (click)="toggle(true)">Activate User</button>
+        }
+      </div>
+    </div>
+  }
+</div>

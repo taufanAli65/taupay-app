@@ -1,0 +1,76 @@
+<div class="flex min-h-screen bg-cream font-sans text-black">
+  <aside class="bg-white border-r border-cream-dark flex flex-col fixed top-0 left-0 h-screen z-50 transition-all duration-300"
+         [class.w-64]="!collapsed()" [class.w-20]="collapsed()">
+    <div class="flex items-center gap-3 border-b border-cream-dark transition-all duration-300"
+         [class.p-6]="!collapsed()" [class.p-4]="collapsed()">
+      <div class="w-9 h-9 rounded bg-emerald-dark flex items-center justify-center text-sm shadow">
+        <app-icon name="credit-card" class="w-4 h-4 text-white"></app-icon>
+      </div>
+      <div class="text-xl font-extrabold text-emerald-dark tracking-tight" [class.hidden]="collapsed()">TauPay</div>
+    </div>
+
+    <nav class="p-4 flex-1 overflow-y-auto">
+      <div class="text-[0.7rem] font-bold uppercase tracking-widest text-gray-400 p-3 pb-2" [class.hidden]="collapsed()">Overview</div>
+      <a class="flex items-center gap-3 p-2.5 rounded-lg text-black-soft font-medium text-sm transition-all hover:bg-cream hover:text-black mb-1 [&.active]:bg-emerald-dark/10 [&.active]:text-emerald-dark" routerLink="/admin/dashboard" routerLinkActive="active">
+        <app-icon name="dashboard" class="w-4 h-4"></app-icon>
+        <span [class.hidden]="collapsed()">Dashboard</span>
+      </a>
+
+      <div class="text-[0.7rem] font-bold uppercase tracking-widest text-gray-400 p-3 pb-2 mt-4" [class.hidden]="collapsed()">Management</div>
+      <a class="flex items-center gap-3 p-2.5 rounded-lg text-black-soft font-medium text-sm transition-all hover:bg-cream hover:text-black mb-1 [&.active]:bg-emerald-dark/10 [&.active]:text-emerald-dark" routerLink="/admin/users" routerLinkActive="active">
+        <app-icon name="users" class="w-4 h-4"></app-icon>
+        <span [class.hidden]="collapsed()">Users</span>
+      </a>
+      <a class="flex items-center gap-3 p-2.5 rounded-lg text-black-soft font-medium text-sm transition-all hover:bg-cream hover:text-black mb-1 [&.active]:bg-emerald-dark/10 [&.active]:text-emerald-dark" routerLink="/admin/merchants" routerLinkActive="active">
+        <app-icon name="store" class="w-4 h-4"></app-icon>
+        <span [class.hidden]="collapsed()">Merchants</span>
+      </a>
+      <a class="flex items-center gap-3 p-2.5 rounded-lg text-black-soft font-medium text-sm transition-all hover:bg-cream hover:text-black mb-1 [&.active]:bg-emerald-dark/10 [&.active]:text-emerald-dark" routerLink="/admin/categories" routerLinkActive="active">
+        <app-icon name="tag" class="w-4 h-4"></app-icon>
+        <span [class.hidden]="collapsed()">Categories</span>
+      </a>
+      <a class="flex items-center gap-3 p-2.5 rounded-lg text-black-soft font-medium text-sm transition-all hover:bg-cream hover:text-black mb-1 [&.active]:bg-emerald-dark/10 [&.active]:text-emerald-dark" routerLink="/admin/products" routerLinkActive="active">
+        <app-icon name="box" class="w-4 h-4"></app-icon>
+        <span [class.hidden]="collapsed()">Products</span>
+      </a>
+
+      <div class="text-[0.7rem] font-bold uppercase tracking-widest text-gray-400 p-3 pb-2 mt-4" [class.hidden]="collapsed()">Monitoring</div>
+      <a class="flex items-center gap-3 p-2.5 rounded-lg text-black-soft font-medium text-sm transition-all hover:bg-cream hover:text-black mb-1 [&.active]:bg-emerald-dark/10 [&.active]:text-emerald-dark" routerLink="/admin/transactions" routerLinkActive="active">
+        <app-icon name="activity" class="w-4 h-4"></app-icon>
+        <span [class.hidden]="collapsed()">Txn Monitor</span>
+      </a>
+    </nav>
+
+    <div class="p-4 border-t border-cream-dark">
+      <div class="flex items-center gap-3 mb-3" [class.justify-center]="collapsed()">
+        <div class="w-8 h-8 rounded-full text-white flex items-center justify-center text-xs font-bold" style="background:linear-gradient(135deg,#f59e0b,#f87171)">SA</div>
+        <div [class.hidden]="collapsed()">
+          <div class="text-[0.8rem] font-semibold truncate max-w-[120px]">{{ email }}</div>
+          <span class="inline-block px-2 py-0.5 bg-yellow-100 text-yellow-700 rounded text-[0.7rem] font-bold">SUPER ADMIN</span>
+        </div>
+      </div>
+      <button class="w-full flex items-center gap-2 p-2 rounded-lg text-red-500 font-medium text-sm hover:bg-red-50 transition-all" (click)="logout()">
+        <app-icon name="logout" class="w-4 h-4"></app-icon>
+        <span [class.hidden]="collapsed()">Sign Out</span>
+      </button>
+    </div>
+  </aside>
+
+  <div class="flex-1 flex flex-col min-h-screen transition-all duration-300" [class.ml-64]="!collapsed()" [class.ml-20]="collapsed()">
+    <header class="h-16 bg-white border-b border-cream-dark flex items-center justify-between px-6 sticky top-0 z-40">
+      <div class="topbar-left flex items-center gap-3">
+        <button class="w-9 h-9 rounded-lg border border-cream-dark hover:bg-cream transition-colors flex items-center justify-center"
+                (click)="toggleSidebar()" aria-label="Toggle sidebar">
+          <app-icon [name]="collapsed() ? 'chevron-right' : 'chevron-left'" class="w-4 h-4 text-gray-600"></app-icon>
+        </button>
+        <h2 class="text-base font-semibold text-gray-500">Super Admin</h2>
+      </div>
+      <div class="topbar-right">
+        <div class="w-8 h-8 rounded-full text-white flex items-center justify-center text-xs font-bold shadow" style="background:linear-gradient(135deg,#f59e0b,#f87171)">SA</div>
+      </div>
+    </header>
+    <main class="flex-1 p-6">
+      <router-outlet />
+    </main>
+  </div>
+</div>
