@@ -57,8 +57,13 @@ export class AdminMerchantDetailComponent implements OnInit {
     this.isNew = !id || id === 'new';
     if (!id || id === 'new') {
       this.isNew = true;
-      this.form.get('email')?.addValidators([Validators.required, Validators.email]);
-      this.form.get('password')?.addValidators([Validators.required, Validators.minLength(8)]);
+      const emailControl = this.form.get('email');
+      const passwordControl = this.form.get('password');
+
+      emailControl?.addValidators([Validators.required, Validators.email]);
+      passwordControl?.addValidators([Validators.required, Validators.minLength(8)]);
+      emailControl?.updateValueAndValidity();
+      passwordControl?.updateValueAndValidity();
     } else {
       this.isNew = false;
       this.merchantId = id;
