@@ -1,103 +1,73 @@
-<div class="animate-fade-in max-w-2xl">
-  <div class="mb-8">
-    <h1 class="text-3xl font-bold text-black mb-1 tracking-tight">{{ isEdit ? 'Edit Product' : 'Add Product' }}</h1>
-    <p class="text-black-soft">{{ isEdit ? 'Update product details' : 'Create a new product listing' }}</p>
+<form [formGroup]="form" class="space-y-6">
+  <!-- Image Upload Section -->
+  <div class="flex flex-col items-center gap-4">
+    <div class="relative w-32 h-32 rounded-2xl bg-cream border-2 border-dashed border-cream-dark flex items-center justify-center overflow-hidden group shadow-sm transition-all hover:border-emerald-light">
+      @if (previewUrl()) {
+        <img [src]="previewUrl()" class="w-full h-full object-cover">
+        <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+          <button type="button" (click)="fileInput.click()" class="w-8 h-8 rounded-full bg-white text-emerald-dark flex items-center justify-center hover:scale-110 transition-transform">
+            <app-icon name="edit" class="w-4 h-4"></app-icon>
+          </button>
+          <button type="button" (click)="removeImage()" class="w-8 h-8 rounded-full bg-white text-red-500 flex items-center justify-center hover:scale-110 transition-transform">
+            <app-icon name="trash" class="w-4 h-4"></app-icon>
+          </button>
+        </div>
+      } @else {
+        <div class="flex flex-col items-center text-gray-400 group-hover:text-emerald-light transition-colors cursor-pointer" (click)="fileInput.click()">
+          <app-icon name="paperclip" class="w-8 h-8 mb-1"></app-icon>
+          <span class="text-[10px] font-bold uppercase tracking-wider">Upload</span>
+        </div>
+      }
+      <input type="file" #fileInput (change)="onFileChange($event)" accept="image/*" class="hidden">
+    </div>
+    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Format: JPG, PNG (Max. 2MB)</p>
   </div>
 
-  <div class="bg-white border border-cream-dark rounded-xl p-8 shadow-sm">
-    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-col gap-5">
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+    <!-- Product Name -->
+    <div class="flex flex-col gap-1.5">
+      <label class="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest">Product Name *</label>
+      <input type="text" formControlName="name" placeholder="e.g. Arabica Coffee"
+        class="bg-cream/30 border border-cream-dark rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-light transition-all"
+        [class.border-red-300]="isInvalid('name')">
+    </div>
 
-      <div class="flex flex-col gap-1.5">
-        <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">Product Name *</label>
-        <input type="text" class="w-full bg-cream border border-cream-dark rounded-md px-4 py-2.5 text-black focus:outline-none focus:border-emerald-dark focus:ring-1 focus:ring-emerald-dark transition-all"
-          [class.border-red-500]="isInvalid('name')"
-          formControlName="name" placeholder="e.g. Kopi Gayo V60" />
-        @if (isInvalid('name')) {
-          <span class="text-xs text-red-500 mt-1 flex items-center gap-1">
-            <app-icon name="warning" class="w-3.5 h-3.5"></app-icon>
-            Required
-          </span>
+    <!-- Category -->
+    <div class="flex flex-col gap-1.5">
+      <label class="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest">Category</label>
+      <select formControlName="categoryId"
+        class="bg-cream/30 border border-cream-dark rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-light transition-all">
+        <option value="">Select Category...</option>
+        @for (c of categories(); track c.id) {
+          <option [value]="c.id">{{ c.name }}</option>
         }
-      </div>
+      </select>
+    </div>
 
-      <div class="grid grid-cols-2 gap-5">
-        <div class="flex flex-col gap-1.5">
-          <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">Price (IDR) *</label>
-          <input type="number" class="w-full bg-cream border border-cream-dark rounded-md px-4 py-2.5 text-black focus:outline-none focus:border-emerald-dark focus:ring-1 focus:ring-emerald-dark transition-all"
-            [class.border-red-500]="isInvalid('price')"
-            formControlName="price" placeholder="25000" min="0" />
-          @if (isInvalid('price')) {
-            <span class="text-xs text-red-500 mt-1 flex items-center gap-1">
-              <app-icon name="warning" class="w-3.5 h-3.5"></app-icon>
-              Required (>= 0)
-            </span>
-          }
-        </div>
-        <div class="flex flex-col gap-1.5">
-          <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">Stock *</label>
-          <input type="number" class="w-full bg-cream border border-cream-dark rounded-md px-4 py-2.5 text-black focus:outline-none focus:border-emerald-dark focus:ring-1 focus:ring-emerald-dark transition-all"
-            [class.border-red-500]="isInvalid('stock')"
-            formControlName="stock" placeholder="100" min="0" />
-          @if (isInvalid('stock')) {
-            <span class="text-xs text-red-500 mt-1 flex items-center gap-1">
-              <app-icon name="warning" class="w-3.5 h-3.5"></app-icon>
-              Required (>= 0)
-            </span>
-          }
-        </div>
+    <!-- Price -->
+    <div class="flex flex-col gap-1.5">
+      <label class="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest">Price (IDR) *</label>
+      <div class="relative">
+        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-sm">Rp</span>
+        <input type="number" formControlName="price"
+          class="w-full bg-cream/30 border border-cream-dark rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-light transition-all font-bold"
+          [class.border-red-300]="isInvalid('price')">
       </div>
+    </div>
 
-      <div class="flex flex-col gap-1.5">
-        <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">Category</label>
-        <select class="w-full bg-cream border border-cream-dark rounded-md px-4 py-2.5 text-black focus:outline-none focus:border-emerald-dark focus:ring-1 focus:ring-emerald-dark transition-all" formControlName="categoryId">
-          <option value="">No category</option>
-          @for (cat of categories(); track cat.id) {
-            <option [value]="cat.id">{{ cat.name }}</option>
-          }
-        </select>
-      </div>
-
-      <div class="flex flex-col gap-1.5">
-        <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">Description</label>
-        <textarea class="w-full bg-cream border border-cream-dark rounded-md px-4 py-2.5 text-black focus:outline-none focus:border-emerald-dark focus:ring-1 focus:ring-emerald-dark transition-all min-h-[100px]" formControlName="description"
-          rows="3" placeholder="Product description..."></textarea>
-      </div>
-
-      <div class="flex flex-col gap-1.5">
-        <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">Product Image</label>
-        <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 cursor-pointer transition-all flex flex-col items-center justify-center min-h-[120px] hover:border-emerald-dark hover:bg-emerald-dark/5" (click)="fileInput.click()" [ngClass]="{'border-emerald-dark bg-emerald-dark/5': selectedFile()}">
-          @if (previewUrl()) {
-            <img [src]="previewUrl()!" alt="preview" class="max-h-[120px] rounded-lg object-contain shadow" />
-          } @else {
-            <div class="text-center">
-              <div class="mx-auto w-12 h-12 rounded-full bg-cream flex items-center justify-center mb-2">
-                <app-icon name="box" class="w-6 h-6 text-emerald-dark"></app-icon>
-              </div>
-              <div class="text-gray-500 text-sm font-medium">Click to upload image</div>
-              <div class="text-gray-400 text-xs mt-1">PNG, JPG (max 5MB)</div>
-            </div>
-          }
-          <input #fileInput type="file" accept="image/*" class="hidden"
-            (change)="onFileChange($event)" />
-        </div>
-        @if (selectedFile()) {
-          <span class="text-gray-500 text-sm mt-1 flex items-center gap-2">
-            <app-icon name="paperclip" class="w-4 h-4"></app-icon>
-            {{ selectedFile()!.name }}
-          </span>
-        }
-      </div>
-
-      <div class="flex gap-3 mt-4">
-        <button type="submit" class="bg-emerald-dark hover:bg-black text-white font-semibold py-2.5 px-6 rounded-md transition-all disabled:opacity-50" [disabled]="loading()">
-          @if (loading()) { 
-            <span class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2 align-middle"></span> Saving... 
-          } @else { 
-            {{ isEdit ? 'Save Changes' : 'Create Product' }} 
-          }
-        </button>
-        <button type="button" class="bg-transparent border-2 border-gray-300 hover:bg-gray-100 text-gray-700 font-semibold py-2.5 px-6 rounded-md transition-all" (click)="cancel()">Cancel</button>
-      </div>
-    </form>
+    <!-- Stock -->
+    <div class="flex flex-col gap-1.5">
+      <label class="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest">Current Stock *</label>
+      <input type="number" formControlName="stock"
+        class="bg-cream/30 border border-cream-dark rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-light transition-all font-mono"
+        [class.border-red-300]="isInvalid('stock')">
+    </div>
   </div>
-</div>
+
+  <!-- Description -->
+  <div class="flex flex-col gap-1.5">
+    <label class="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest">Description</label>
+    <textarea formControlName="description" rows="3" placeholder="Tell more about your product..."
+      class="bg-cream/30 border border-cream-dark rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-light transition-all"></textarea>
+  </div>
+</form>

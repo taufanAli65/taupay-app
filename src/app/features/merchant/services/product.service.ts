@@ -30,16 +30,24 @@ export class ProductService {
     return this.http.get<ApiResponse<Product>>(`${this.base}/products/${id}`);
   }
 
-  create(data: CreateProductRequest, file?: File) {
+  create(data: any, file?: File) {
     const form = new FormData();
-    form.append('data', new Blob([JSON.stringify(data)], { type: 'application/json' }));
+    Object.keys(data).forEach(key => {
+      if (data[key] !== undefined && data[key] !== null) {
+        form.append(key, data[key].toString());
+      }
+    });
     if (file) form.append('file', file);
     return this.http.post<ApiResponse<Product>>(`${this.base}/products`, form);
   }
 
-  update(id: string, data: CreateProductRequest, file?: File) {
+  update(id: string, data: any, file?: File) {
     const form = new FormData();
-    form.append('data', new Blob([JSON.stringify(data)], { type: 'application/json' }));
+    Object.keys(data).forEach(key => {
+      if (data[key] !== undefined && data[key] !== null) {
+        form.append(key, data[key].toString());
+      }
+    });
     if (file) form.append('file', file);
     return this.http.put<ApiResponse<Product>>(`${this.base}/products/${id}`, form);
   }
