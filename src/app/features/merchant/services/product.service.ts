@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from '@env';
 import { ApiResponse } from '@shared/models/api-response.model';
 import { Product, CreateProductRequest, ProductCategory } from '@shared/models/product.model';
@@ -9,8 +9,21 @@ export class ProductService {
   private http = inject(HttpClient);
   private base = `${environment.apiUrl}/api/v1`;
 
-  getAll(page = 0, size = 10) {
-    return this.http.get<ApiResponse<Product[]>>(`${this.base}/products?page=${page}&size=${size}`);
+  getAll(page = 0, size = 10, search = '', filters: { [key: string]: any } = {}) {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('size', size.toString());
+
+    if (search) params = params.set('search', search);
+
+    Object.keys(filters).forEach(key => {
+      const val = filters[key];
+      if (val !== undefined && val !== null && val !== '') {
+        params = params.set(key, val.toString());
+      }
+    });
+
+    return this.http.get<ApiResponse<Product[]>>(`${this.base}/products`, { params });
   }
 
   getById(id: string) {
@@ -32,11 +45,11 @@ export class ProductService {
   }
 
   activate(id: string) {
-    return this.http.patch<ApiResponse<void>>(`${this.base}/products/${id}/activate`, {});
+    return this.http.patch<ApiResponse<void>>(`${this.base}/products/${id}/activate`, null);
   }
 
   deactivate(id: string) {
-    return this.http.patch<ApiResponse<void>>(`${this.base}/products/${id}/deactive`, {});
+    return this.http.patch<ApiResponse<void>>(`${this.base}/products/${id}/deactive`, null);
   }
 
   getCategories() {
