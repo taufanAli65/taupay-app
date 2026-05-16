@@ -1,0 +1,84 @@
+<div class="animate-fade-in w-full">
+  <div class="flex justify-between items-center mb-8">
+    <div>
+      <h1 class="text-3xl font-bold text-black mb-1 tracking-tight">Archived Products</h1>
+      <p class="text-black-soft">Manage and restore your deactivated products</p>
+    </div>
+    <a routerLink="/merchant/products" class="bg-white border border-cream-dark hover:bg-cream text-black-soft font-bold py-2.5 px-5 rounded-lg transition-all shadow-sm flex items-center gap-2">
+      <app-icon name="chevron-left" class="w-4 h-4"></app-icon>
+      Back to Products
+    </a>
+  </div>
+
+  <app-data-table 
+    [data]="store.products()" 
+    [columns]="columns"
+    [loading]="store.loading()"
+    [showSearch]="true"
+    [searchQuery]="store.searchQuery()"
+    [currentPage]="store.currentPage()"
+    [totalPages]="store.totalPages()"
+    [totalElements]="store.totalElements()"
+    searchPlaceholder="Search archived products..."
+    (search)="store.setSearchQuery($event)"
+    (pageChange)="store.loadPage($event)"
+    [customTemplates]="{ 
+      product: productTpl, 
+      category: categoryTpl, 
+      price: priceTpl, 
+      actions: actionTpl 
+    }">
+  </app-data-table>
+</div>
+
+<!-- Template: Product Image & Name -->
+<ng-template #productTpl let-p>
+  <div class="flex items-center gap-3 grayscale opacity-70 group-hover:grayscale-0 group-hover:opacity-100 transition-all">
+    <div class="w-10 h-10 rounded-lg bg-cream flex items-center justify-center overflow-hidden shrink-0 shadow-sm border border-cream-dark">
+      @if (p.imageUrl) { 
+        <img [src]="p.imageUrl" class="w-full h-full object-cover"> 
+      } @else { 
+        <app-icon name="box" class="w-4 h-4 text-gray-400"></app-icon> 
+      }
+    </div>
+    <div class="min-w-0">
+      <span class="font-bold text-sm text-black truncate block max-w-[200px]">{{ p.name }}</span>
+      <span class="text-[10px] text-gray-400 truncate block max-w-[200px]">{{ p.description }}</span>
+    </div>
+  </div>
+</ng-template>
+
+<!-- Template: Category -->
+<ng-template #categoryTpl let-p>
+  <span class="inline-block px-2.5 py-1 rounded text-[10px] font-extrabold uppercase tracking-wider border bg-gray-100 border-gray-200 text-gray-500">
+    {{ p.category?.name || 'Uncategorized' }}
+  </span>
+</ng-template>
+
+<!-- Template: Price -->
+<ng-template #priceTpl let-p>
+  <span class="font-extrabold text-sm text-gray-400 group-hover:text-black transition-colors">{{ p.price | currencyIdr }}</span>
+</ng-template>
+
+<!-- Template: Actions -->
+<ng-template #actionTpl let-p>
+  <div class="flex justify-end">
+    <button class="bg-green-50 hover:bg-green-100 text-green-700 font-bold py-1.5 px-4 rounded-lg transition-all border border-green-200 flex items-center gap-2" 
+            (click)="triggerActivate(p)">
+      <app-icon name="check-circle" class="w-3.5 h-3.5"></app-icon>
+      Restore
+    </button>
+  </div>
+</ng-template>
+
+<!-- Confirmation Modal -->
+<app-modal
+  *ngIf="showConfirmModal()"
+  title="Restore Product?"
+  type="success"
+  confirmLabel="Yes, Restore"
+  (onConfirm)="confirmActivate()"
+  (onCancel)="closeModal()">
+  Are you sure you want to restore <span class="font-bold text-black">"{{ targetProduct()?.name }}"</span>? 
+  It will be visible again in your store catalog.
+</app-modal>

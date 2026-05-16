@@ -14,7 +14,7 @@ import { IconComponent } from '@shared/components/icon/icon.component';
 @Component({
   selector: 'app-product-list',
   standalone: true,
-  imports: [CommonModule, CurrencyIdrPipe, DataTableComponent, ModalComponent, FormModalComponent, ProductFormComponent, IconComponent],
+  imports: [RouterLink, CommonModule, CurrencyIdrPipe, DataTableComponent, ModalComponent, FormModalComponent, ProductFormComponent, IconComponent],
   templateUrl: './product-list.component.html'
 })
 export class ProductListComponent implements OnInit {

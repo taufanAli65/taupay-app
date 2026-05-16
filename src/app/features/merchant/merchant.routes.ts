@@ -16,6 +16,10 @@ export const MERCHANT_ROUTES: Routes = [
         loadComponent: () => import('./products/product-list/product-list.component').then(m => m.ProductListComponent)
       },
       {
+        path: 'products/deactivated',
+        loadComponent: () => import('./products/deactivated-product-list/deactivated-product-list.component').then(m => m.DeactivatedProductListComponent)
+      },
+      {
         path: 'products/new',
         loadComponent: () => import('./products/product-form/product-form.component').then(m => m.ProductFormComponent)
       },

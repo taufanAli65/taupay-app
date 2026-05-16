@@ -4,10 +4,16 @@
       <h1 class="text-3xl font-bold text-black mb-1 tracking-tight">Products</h1>
       <p class="text-black-soft">Manage your product catalog and inventory</p>
     </div>
-    <button (click)="openAddModal()" class="bg-emerald-dark hover:bg-black text-white font-bold py-2.5 px-5 rounded-lg transition-all shadow-md flex items-center gap-2">
-      <app-icon name="plus" class="w-4 h-4"></app-icon>
-      Add Product
-    </button>
+    <div class="flex items-center gap-3">
+      <a routerLink="/merchant/products/deactivated" class="bg-white border border-cream-dark hover:bg-cream text-black-soft font-bold py-2.5 px-5 rounded-lg transition-all shadow-sm flex items-center gap-2">
+        <app-icon name="clock" class="w-4 h-4"></app-icon>
+        Archive
+      </a>
+      <button (click)="openAddModal()" class="bg-emerald-dark hover:bg-black text-white font-bold py-2.5 px-5 rounded-lg transition-all shadow-md flex items-center gap-2">
+        <app-icon name="plus" class="w-4 h-4"></app-icon>
+        Add Product
+      </button>
+    </div>
   </div>
 
   <app-data-table 

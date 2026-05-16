@@ -63,4 +63,14 @@ export class ProductService {
   getCategories() {
     return this.http.get<ApiResponse<ProductCategory[]>>(`${this.base}/products/categories`);
   }
+
+  getDeactivatedProducts(page = 0, size = 10, search = '') {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('size', size.toString());
+
+    if (search) params = params.set('search', search);
+
+    return this.http.get<ApiResponse<Product[]>>(`${this.base}/products/deactivated`, { params });
+  }
 }
