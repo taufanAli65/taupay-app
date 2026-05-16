@@ -28,6 +28,10 @@ export const MERCHANT_ROUTES: Routes = [
         loadComponent: () => import('./products/product-form/product-form.component').then(m => m.ProductFormComponent)
       },
       {
+        path: 'categories',
+        loadComponent: () => import('./products/product-category-list/product-category-list.component').then(m => m.ProductCategoryListComponent)
+      },
+      {
         path: 'transactions/new',
         loadComponent: () => import('./transactions/create-transaction/create-transaction.component').then(m => m.CreateTransactionComponent)
       },

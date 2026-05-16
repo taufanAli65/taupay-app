@@ -60,8 +60,21 @@ export class ProductService {
     return this.http.patch<ApiResponse<void>>(`${this.base}/products/${id}/deactive`, null);
   }
 
-  getCategories() {
-    return this.http.get<ApiResponse<ProductCategory[]>>(`${this.base}/products/categories`);
+  getCategories(search = '') {
+    const params = search ? `?search=${search}` : '';
+    return this.http.get<ApiResponse<ProductCategory[]>>(`${this.base}/products/categories${params}`);
+  }
+
+  createCategory(name: string) {
+    return this.http.post<ApiResponse<ProductCategory>>(`${this.base}/products/categories`, { name });
+  }
+
+  updateCategory(id: string, name: string) {
+    return this.http.put<ApiResponse<ProductCategory>>(`${this.base}/products/categories/${id}`, { name });
+  }
+
+  deleteCategory(id: string) {
+    return this.http.delete<ApiResponse<void>>(`${this.base}/products/categories/${id}`);
   }
 
   getDeactivatedProducts(page = 0, size = 10, search = '') {
