@@ -32,4 +32,8 @@ export class AdminProductService {
 
   activate(id: string)   { return this.http.patch<ApiResponse<void>>(`${this.base}/${id}/activate`, null); }
   deactivate(id: string) { return this.http.patch<ApiResponse<void>>(`${this.base}/${id}/deactive`, null); }
+
+  getStatistics() {
+    return this.http.get<ApiResponse<{ total: number; active: number; deactivated: number }>>(`${this.base}/statistics`);
+  }
 }

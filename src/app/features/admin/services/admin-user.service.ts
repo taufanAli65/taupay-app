@@ -29,4 +29,8 @@ export class AdminUserService {
 
   activate(id: string)   { return this.http.get<ApiResponse<void>>(`${this.base}/${id}/activate`); }
   deactivate(id: string) { return this.http.get<ApiResponse<void>>(`${this.base}/${id}/deactivate`); }
+
+  getStatistics() {
+    return this.http.get<ApiResponse<{ total: number; active: number; deactivated: number }>>(`${this.base}/statistics`);
+  }
 }

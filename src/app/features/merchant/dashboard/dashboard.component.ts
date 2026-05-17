@@ -1,31 +1,53 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, ViewChild } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { MerchantService } from '@features/merchant/services/merchant.service';
-import { ProductService } from '@features/merchant/services/product.service';
-import { MerchantProfile } from '@shared/models/merchant.model';
-import { Product } from '@shared/models/product.model';
+import { MerchantDashboardStore } from '../state/merchant-dashboard.store';
 import { CurrencyIdrPipe } from '@shared/pipes/currency-idr.pipe';
 import { IconComponent } from '@shared/components/icon/icon.component';
+import { DataTableComponent } from '@shared/components/data-table/data-table.component';
+import { TableColumn } from '@shared/components/data-table/data-table.model';
+import { FormModalComponent } from '@shared/components/modal/form-modal.component';
+import { ProductFormComponent } from '../products/product-form/product-form.component';
 
 @Component({
   selector: 'app-merchant-dashboard',
   standalone: true,
-  imports: [RouterLink, CommonModule, CurrencyIdrPipe, IconComponent],
+  imports: [RouterLink, CommonModule, CurrencyIdrPipe, IconComponent, DataTableComponent, FormModalComponent, ProductFormComponent],
   templateUrl: './dashboard.component.html'
 })
 export class MerchantDashboardComponent implements OnInit {
-  private merchantService = inject(MerchantService);
-  private productService = inject(ProductService);
-  merchant = signal<MerchantProfile | null>(null);
-  products = signal<Product[]>([]);
+  readonly store = inject(MerchantDashboardStore);
+  @ViewChild(ProductFormComponent) productForm?: ProductFormComponent;
 
-  get activeProducts(): number {
-    return this.products().filter(p => p.isActive).length;
-  }
+  // Modal State
+  showFormModal = signal(false);
+
+  columns: TableColumn[] = [
+    { key: 'product', label: 'Product', custom: true },
+    { key: 'price', label: 'Price', custom: true },
+    { key: 'stock', label: 'Stock', className: 'font-mono' },
+    { key: 'isActive', label: 'Status', custom: true }
+  ];
 
   ngOnInit(): void {
-    this.merchantService.getMe().subscribe(r => this.merchant.set(r.data));
-    this.productService.getAll(0, 10).subscribe(r => this.products.set(r.data));
+    this.store.loadDashboardData();
+  }
+
+  // --- FORM MODAL ACTIONS ---
+  openAddModal() {
+    this.showFormModal.set(true);
+  }
+
+  closeFormModal() {
+    this.showFormModal.set(false);
+  }
+
+  saveProduct() {
+    this.productForm?.submit();
+  }
+
+  onProductSaved() {
+    this.closeFormModal();
+    this.store.loadDashboardData(); // Refresh stats and recent list
   }
 }

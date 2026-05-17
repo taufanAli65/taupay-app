@@ -22,6 +22,11 @@
         <span [class.hidden]="collapsed()">Products</span>
       </a>
       <a class="flex items-center gap-3 p-2.5 rounded-lg text-black-soft font-medium text-sm transition-all hover:bg-cream hover:text-black mb-1 [&.active]:bg-emerald-dark/10 [&.active]:text-emerald-dark"
+        routerLink="/merchant/categories" routerLinkActive="active">
+        <app-icon name="tag" class="w-4 h-4"></app-icon>
+        <span [class.hidden]="collapsed()">Categories</span>
+      </a>
+      <a class="flex items-center gap-3 p-2.5 rounded-lg text-black-soft font-medium text-sm transition-all hover:bg-cream hover:text-black mb-1 [&.active]:bg-emerald-dark/10 [&.active]:text-emerald-dark"
         routerLink="/merchant/transactions/new" routerLinkActive="active">
         <app-icon name="credit-card" class="w-4 h-4"></app-icon>
         <span [class.hidden]="collapsed()">New Transaction</span>

@@ -1,6 +1,6 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
 import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AdminMerchantService } from '@features/admin/services/admin-merchant.service';
 import { ToastService } from '@shared/components/toast/toast.service';
@@ -9,24 +9,28 @@ import { Product } from '@shared/models/product.model';
 import { DataTableComponent } from '@shared/components/data-table/data-table.component';
 import { TableColumn } from '@shared/components/data-table/data-table.model';
 import { CurrencyIdrPipe } from '@shared/pipes/currency-idr.pipe';
+import { IconComponent } from '@shared/components/icon/icon.component';
 
 @Component({
   selector: 'app-admin-merchant-detail',
   standalone: true,
-  imports: [ReactiveFormsModule, CommonModule, RouterLink, DataTableComponent, CurrencyIdrPipe],
+  imports: [ReactiveFormsModule, CommonModule, DataTableComponent, CurrencyIdrPipe, IconComponent, RouterLink],
   templateUrl: './merchant-detail.component.html'
 })
-export class AdminMerchantDetailComponent implements OnInit {
+export class AdminMerchantDetailComponent implements OnInit, OnChanges {
+  @Input() merchantId?: string | null;
+  @Output() onSaved = new EventEmitter<void>();
+  @Output() onCancel = new EventEmitter<void>();
+
   private fb = inject(FormBuilder);
-  private route = inject(ActivatedRoute);
-  private router = inject(Router);
   private merchantService = inject(AdminMerchantService);
+  private route = inject(ActivatedRoute);
   private toast = inject(ToastService);
 
-  isNew = false;
+  isNew = true;
+  isModalMode = false;
   saving = signal(false);
   categories = signal<MerchantCategory[]>([]);
-  merchantId = '';
 
   products = signal<Product[]>([]);
   loadingProducts = signal(false);
@@ -52,34 +56,54 @@ export class AdminMerchantDetailComponent implements OnInit {
 
   ngOnInit(): void {
     this.merchantService.getCategories().subscribe(r => this.categories.set(r.data));
-
-    const id = this.route.snapshot.paramMap.get('id');
-    this.isNew = !id || id === 'new';
-    if (!id || id === 'new') {
-      this.isNew = true;
-      const emailControl = this.form.get('email');
-      const passwordControl = this.form.get('password');
-
-      emailControl?.addValidators([Validators.required, Validators.email]);
-      passwordControl?.addValidators([Validators.required, Validators.minLength(8)]);
-      emailControl?.updateValueAndValidity();
-      passwordControl?.updateValueAndValidity();
-    } else {
-      this.isNew = false;
-      this.merchantId = id;
-      this.merchantService.getById(id).subscribe(r => {
-        this.form.patchValue({ 
-          name: r.data.name, 
-          categoryId: r.data.categoryId, 
-          address: r.data.address 
-        });
-      });
-      this.loadProducts(0);
+    
+    const routeId = this.route.snapshot.paramMap.get('id');
+    if (routeId) {
+      this.isModalMode = false;
+      this.merchantId = routeId;
+      this.resetAndInit(routeId);
     }
   }
 
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['merchantId']) {
+      this.isModalMode = true;
+      const id = changes['merchantId'].currentValue;
+      this.resetAndInit(id);
+    }
+  }
+
+  private resetAndInit(id?: string | null) {
+    this.form.reset();
+    this.isNew = !id || id === 'new';
+    const emailControl = this.form.get('email');
+    const passwordControl = this.form.get('password');
+    
+    if (this.isNew) {
+      emailControl?.setValidators([Validators.required, Validators.email]);
+      passwordControl?.setValidators([Validators.required, Validators.minLength(8)]);
+    } else {
+      emailControl?.clearValidators();
+      passwordControl?.clearValidators();
+      this.loadMerchant(id!);
+      this.loadProducts(0);
+    }
+    emailControl?.updateValueAndValidity();
+    passwordControl?.updateValueAndValidity();
+  }
+
+  private loadMerchant(id: string) {
+    this.merchantService.getById(id).subscribe(r => {
+      this.form.patchValue({ 
+        name: r.data.name, 
+        categoryId: r.data.categoryId, 
+        address: r.data.address 
+      });
+    });
+  }
+
   loadProducts(page: number): void {
-    if (this.isNew) return;
+    if (this.isNew || !this.merchantId) return;
     this.loadingProducts.set(true);
     this.merchantService.getMerchantProducts(this.merchantId, page, 10).subscribe({
       next: r => {
@@ -93,7 +117,7 @@ export class AdminMerchantDetailComponent implements OnInit {
     });
   }
 
-  onSubmit(): void {
+  submit(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
@@ -110,7 +134,7 @@ export class AdminMerchantDetailComponent implements OnInit {
           email: v.email!,
           password: v.password!
         })
-      : this.merchantService.update(this.merchantId, {
+      : this.merchantService.update(this.merchantId!, {
           name: v.name!,
           categoryId: v.categoryId!,
           address: v.address!
@@ -119,7 +143,8 @@ export class AdminMerchantDetailComponent implements OnInit {
     call.subscribe({
       next: () => {
         this.toast.show(this.isNew ? 'Merchant created!' : 'Merchant updated!', 'success');
-        this.router.navigate(['/admin/merchants']);
+        this.onSaved.emit();
+        this.saving.set(false);
       },
       error: () => this.saving.set(false)
     });

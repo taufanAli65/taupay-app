@@ -16,12 +16,20 @@ export const MERCHANT_ROUTES: Routes = [
         loadComponent: () => import('./products/product-list/product-list.component').then(m => m.ProductListComponent)
       },
       {
+        path: 'products/deactivated',
+        loadComponent: () => import('./products/deactivated-product-list/deactivated-product-list.component').then(m => m.DeactivatedProductListComponent)
+      },
+      {
         path: 'products/new',
         loadComponent: () => import('./products/product-form/product-form.component').then(m => m.ProductFormComponent)
       },
       {
         path: 'products/:id/edit',
         loadComponent: () => import('./products/product-form/product-form.component').then(m => m.ProductFormComponent)
+      },
+      {
+        path: 'categories',
+        loadComponent: () => import('./products/product-category-list/product-category-list.component').then(m => m.ProductCategoryListComponent)
       },
       {
         path: 'transactions/new',
