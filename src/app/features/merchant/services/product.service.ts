@@ -65,6 +65,14 @@ export class ProductService {
     return this.http.get<ApiResponse<ProductCategory[]>>(`${this.base}/products/categories${params}`);
   }
 
+  getDashboardProducts(size = 5) {
+    const params = new HttpParams()
+      .set('size', size.toString())
+      .set('sortBy', 'updatedAt')
+      .set('sortDir', 'desc');
+    return this.http.get<ApiResponse<Product[]>>(`${this.base}/products`, { params });
+  }
+
   createCategory(name: string) {
     return this.http.post<ApiResponse<ProductCategory>>(`${this.base}/products/categories`, { name });
   }
