@@ -94,4 +94,8 @@ export class ProductService {
 
     return this.http.get<ApiResponse<Product[]>>(`${this.base}/products/deactivated`, { params });
   }
+
+  getProductStatistics() {
+    return this.http.get<ApiResponse<{ totalProducts: number; activeProducts: number; deactivatedProducts: number }>>(`${this.base}/products/statistics`);
+  }
 }

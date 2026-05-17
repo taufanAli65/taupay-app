@@ -9,7 +9,11 @@ import { finalize, forkJoin } from 'rxjs';
 interface DashboardState {
   merchant: MerchantProfile | null;
   recentProducts: Product[];
-  totalElements: number;
+  stats: {
+    totalProducts: number;
+    activeProducts: number;
+    deactivatedProducts: number;
+  } | null;
   loading: boolean;
 }
 
@@ -23,7 +27,7 @@ export class MerchantDashboardStore {
   private state = signal<DashboardState>({
     merchant: null,
     recentProducts: [],
-    totalElements: 5,
+    stats: null,
     loading: false
   });
 
@@ -31,22 +35,19 @@ export class MerchantDashboardStore {
   merchant = computed(() => this.state().merchant);
   recentProducts = computed(() => this.state().recentProducts);
   loading = computed(() => this.state().loading);
-  totalElements = computed(() => this.state().totalElements);
-
-  // Derivasi data (Computed Stats)
-  totalProducts = computed(() => this.state().recentProducts.length); // Sementara dari list yang ada
-  activeProductsCount = computed(() => 
-    this.state().recentProducts.filter(p => p.isActive).length
-  );
+  
+  totalProducts = computed(() => this.state().stats?.totalProducts ?? 0);
+  activeProductsCount = computed(() => this.state().stats?.activeProducts ?? 0);
+  totalElements = computed(() => this.state().stats?.totalProducts ?? 0);
 
   // --- ACTIONS ---
   loadDashboardData() {
     this.patchState({ loading: true });
 
-    // Gunakan forkJoin agar loading selesai saat kedua API beres
     forkJoin({
       profile: this.merchantService.getMe(),
-      products: this.productService.getDashboardProducts(5)
+      products: this.productService.getDashboardProducts(5),
+      stats: this.productService.getProductStatistics()
     }).pipe(
       finalize(() => this.patchState({ loading: false })),
       takeUntilDestroyed(this.destroyRef)
@@ -55,11 +56,10 @@ export class MerchantDashboardStore {
         this.patchState({
           merchant: res.profile.data,
           recentProducts: res.products.data ?? [],
+          stats: res.stats.data
         });
       },
-      error: () => {
-        // Error dihandle oleh global interceptor
-      }
+      error: () => {}
     });
   }
 

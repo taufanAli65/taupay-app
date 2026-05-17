@@ -12,27 +12,50 @@
 
   <!-- Stats -->
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-    <div class="bg-white border-l-4 border-emerald-dark rounded-xl p-6 shadow-sm relative overflow-hidden">
+    <!-- Total Products -->
+    <div class="bg-white border-l-4 border-emerald-dark rounded-xl p-6 shadow-sm relative overflow-hidden h-32">
       <p class="text-gray-500 text-xs font-bold uppercase tracking-wider mb-1">Total Products</p>
-      <p class="text-3xl font-extrabold text-black">{{ store.totalProducts() }}</p>
+      @if (store.loading()) {
+        <div class="mt-2 w-16 h-8 bg-cream animate-pulse rounded-lg"></div>
+      } @else {
+        <p class="text-3xl font-extrabold text-black">{{ store.totalProducts() }}</p>
+      }
       <app-icon name="box" class="absolute right-4 top-1/2 -translate-y-1/2 w-9 h-9 text-emerald-dark/20"></app-icon>
     </div>
-    <div class="bg-white border-l-4 border-green-500 rounded-xl p-6 shadow-sm relative overflow-hidden">
+
+    <!-- Active Products -->
+    <div class="bg-white border-l-4 border-green-500 rounded-xl p-6 shadow-sm relative overflow-hidden h-32">
       <p class="text-gray-500 text-xs font-bold uppercase tracking-wider mb-1">Active Products</p>
-      <p class="text-3xl font-extrabold text-black">{{ store.activeProductsCount() }}</p>
+      @if (store.loading()) {
+        <div class="mt-2 w-16 h-8 bg-green-50 animate-pulse rounded-lg"></div>
+      } @else {
+        <p class="text-3xl font-extrabold text-black">{{ store.activeProductsCount() }}</p>
+      }
       <app-icon name="check-circle" class="absolute right-4 top-1/2 -translate-y-1/2 w-9 h-9 text-green-500/25"></app-icon>
     </div>
-    <div class="bg-white border-l-4 border-yellow-500 rounded-xl p-6 shadow-sm relative overflow-hidden">
+
+    <!-- Merchant Status -->
+    <div class="bg-white border-l-4 border-yellow-500 rounded-xl p-6 shadow-sm relative overflow-hidden h-32">
       <p class="text-gray-500 text-xs font-bold uppercase tracking-wider mb-1">Merchant Status</p>
-      <div class="flex items-center gap-2 text-lg font-bold text-black mt-2">
-        <app-icon [name]="store.merchant()?.active ? 'check-circle' : 'x-circle'" class="w-4 h-4" [class.text-green-600]="store.merchant()?.active" [class.text-red-500]="!store.merchant()?.active"></app-icon>
-        <span>{{ store.merchant()?.active ? 'Active' : 'Inactive' }}</span>
-      </div>
+      @if (store.loading()) {
+        <div class="mt-2 w-24 h-8 bg-yellow-50 animate-pulse rounded-lg"></div>
+      } @else {
+        <div class="flex items-center gap-2 text-lg font-bold text-black mt-2">
+          <app-icon [name]="store.merchant()?.active ? 'check-circle' : 'x-circle'" class="w-4 h-4" [class.text-green-600]="store.merchant()?.active" [class.text-red-500]="!store.merchant()?.active"></app-icon>
+          <span>{{ store.merchant()?.active ? 'Active' : 'Inactive' }}</span>
+        </div>
+      }
       <app-icon name="store" class="absolute right-4 top-1/2 -translate-y-1/2 w-9 h-9 text-yellow-500/20"></app-icon>
     </div>
-    <div class="bg-white border-l-4 border-blue-500 rounded-xl p-6 shadow-sm relative overflow-hidden">
+
+    <!-- Category -->
+    <div class="bg-white border-l-4 border-blue-500 rounded-xl p-6 shadow-sm relative overflow-hidden h-32">
       <p class="text-gray-500 text-xs font-bold uppercase tracking-wider mb-1">Category</p>
-      <p class="text-lg font-bold text-black mt-2 truncate">{{ store.merchant()?.categoryName || '—' }}</p>
+      @if (store.loading()) {
+        <div class="mt-2 w-32 h-8 bg-blue-50 animate-pulse rounded-lg"></div>
+      } @else {
+        <p class="text-lg font-bold text-black mt-2 truncate">{{ store.merchant()?.categoryName || '—' }}</p>
+      }
       <app-icon name="tag" class="absolute right-4 top-1/2 -translate-y-1/2 w-9 h-9 text-blue-500/20"></app-icon>
     </div>
   </div>
