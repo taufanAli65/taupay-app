@@ -6,22 +6,41 @@
 
   <!-- Stats -->
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-    <div class="bg-white border-l-4 border-blue-500 rounded-xl p-6 shadow-sm relative overflow-hidden">
+    <!-- Total Users -->
+    <div class="bg-white border-l-4 border-blue-500 rounded-xl p-6 shadow-sm relative overflow-hidden h-32">
       <p class="text-gray-500 text-xs font-bold uppercase tracking-wider mb-1">Total Users</p>
-      <p class="text-3xl font-extrabold text-black">{{ userCount() }}</p>
+      @if (store.loading()) {
+        <div class="mt-2 w-16 h-8 bg-blue-50 animate-pulse rounded-lg"></div>
+      } @else {
+        <p class="text-3xl font-extrabold text-black">{{ store.userStats()?.active ?? 0 }}</p>
+      }
       <app-icon name="users" class="absolute right-4 top-1/2 -translate-y-1/2 w-9 h-9 text-blue-500/20"></app-icon>
     </div>
-    <div class="bg-white border-l-4 border-emerald-dark rounded-xl p-6 shadow-sm relative overflow-hidden">
+
+    <!-- Total Merchants -->
+    <div class="bg-white border-l-4 border-emerald-dark rounded-xl p-6 shadow-sm relative overflow-hidden h-32">
       <p class="text-gray-500 text-xs font-bold uppercase tracking-wider mb-1">Total Merchants</p>
-      <p class="text-3xl font-extrabold text-black">{{ merchantCount() }}</p>
+      @if (store.loading()) {
+        <div class="mt-2 w-16 h-8 bg-cream animate-pulse rounded-lg"></div>
+      } @else {
+        <p class="text-3xl font-extrabold text-black">{{ store.merchantStats()?.active ?? 0 }}</p>
+      }
       <app-icon name="store" class="absolute right-4 top-1/2 -translate-y-1/2 w-9 h-9 text-emerald-500/20"></app-icon>
     </div>
-    <div class="bg-white border-l-4 border-green-500 rounded-xl p-6 shadow-sm relative overflow-hidden">
+
+    <!-- Total Products -->
+    <div class="bg-white border-l-4 border-green-500 rounded-xl p-6 shadow-sm relative overflow-hidden h-32">
       <p class="text-gray-500 text-xs font-bold uppercase tracking-wider mb-1">Total Products</p>
-      <p class="text-3xl font-extrabold text-black">{{ productCount() }}</p>
+      @if (store.loading()) {
+        <div class="mt-2 w-16 h-8 bg-green-50 animate-pulse rounded-lg"></div>
+      } @else {
+        <p class="text-3xl font-extrabold text-black">{{ store.productStats()?.active ?? 0 }}</p>
+      }
       <app-icon name="box" class="absolute right-4 top-1/2 -translate-y-1/2 w-9 h-9 text-green-500/20"></app-icon>
     </div>
-    <div class="bg-white border-l-4 border-yellow-500 rounded-xl p-6 shadow-sm relative overflow-hidden">
+
+    <!-- SSE Monitor -->
+    <div class="bg-white border-l-4 border-yellow-500 rounded-xl p-6 shadow-sm relative overflow-hidden h-32">
       <p class="text-gray-500 text-xs font-bold uppercase tracking-wider mb-1">SSE Monitor</p>
       <p class="text-lg font-bold text-black mt-2 flex items-center gap-2">
         <span class="inline-flex items-center gap-2">

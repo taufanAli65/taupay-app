@@ -11,17 +11,24 @@ export class AdminMerchantService {
   private base = `${environment.apiUrl}/api/v1/admin/merchant`;
 
   getAll(page = 0, size = 10, search = '', filters: { [key: string]: any } = {}) {
-    let params = `page=${page}&size=${size}`;
-    if (search) params += `&search=${search}`;
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('size', size.toString());
+
+    if (search) params = params.set('search', search);
     
     Object.keys(filters).forEach(key => {
       const val = filters[key];
       if (val !== undefined && val !== null && val !== '') {
-        params += `&${key}=${val}`;
+        params = params.set(key, val.toString());
       }
     });
 
-    return this.http.get<ApiResponse<MerchantProfile[]>>(`${this.base}?${params}`);
+    return this.http.get<ApiResponse<MerchantProfile[]>>(this.base, { params });
+  }
+
+  getStatistics() {
+    return this.http.get<ApiResponse<{ total: number; active: number; deactivated: number }>>(`${this.base}/statistics`);
   }
 
   getCategories(search = '') {
