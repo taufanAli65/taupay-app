@@ -26,7 +26,7 @@ export class MerchantCategoryComponent implements OnInit {
 
   columns: TableColumn[] = [
     { key: 'name', label: 'Category Name', custom: true },
-    { key: 'id', label: 'ID', className: 'font-mono text-[10px] opacity-50 uppercase' },
+    // { key: 'id', label: 'ID', className: 'font-mono text-[10px] opacity-50 uppercase' },
     { key: 'actions', label: 'Actions', className: 'text-right', custom: true }
   ];
 

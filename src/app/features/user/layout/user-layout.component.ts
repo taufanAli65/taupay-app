@@ -13,14 +13,12 @@ import { IconComponent } from '@shared/components/icon/icon.component';
 export class UserLayoutComponent {
   private authService = inject(AuthService);
   private tokenService = inject(TokenStorageService);
-  collapsed = signal(false);
+  // Desktop sidebar removed; using mobile bottom navigation
 
   get email(): string { return this.tokenService.getEmail() ?? ''; }
   get initials(): string {
     return this.email.substring(0, 2).toUpperCase();
   }
-
-  toggleSidebar(): void { this.collapsed.update(v => !v); }
 
   logout(): void { this.authService.logout(); }
 }
