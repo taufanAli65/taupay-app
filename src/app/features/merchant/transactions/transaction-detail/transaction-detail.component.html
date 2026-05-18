@@ -78,34 +78,6 @@
             <span class="text-xs text-gray-500 mt-2 font-medium">Scan with Wallet App to pay</span>
           </div>
         </div>
-
-        <!-- Demo: Simulate Payment Callback -->
-        <div class="bg-yellow-50 border-2 border-yellow-400 rounded-xl p-6 shadow-sm">
-          <h4 class="text-lg font-bold mb-2 text-yellow-800 flex items-center gap-2">
-            <app-icon name="bolt" class="w-4 h-4"></app-icon>
-            Demo: Submit Payment
-          </h4>
-          <p class="text-yellow-700/80 text-sm mb-4 font-medium">Enter a valid user PIN to simulate the wallet callback for testing.</p>
-          <form [formGroup]="payForm" (ngSubmit)="simulatePay()" class="space-y-4">
-            <div class="flex flex-col gap-1.5">
-              <label class="text-xs font-bold text-yellow-800 uppercase tracking-wider">Payer PIN</label>
-              <input type="password" inputmode="numeric" maxlength="6" class="w-full bg-white border border-yellow-300 rounded-md px-4 py-2.5 text-black focus:outline-none focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500 transition-all" formControlName="pin" placeholder="6-digit PIN" />
-              @if (payForm.get('pin')?.invalid && payForm.get('pin')?.touched) {
-                <p class="text-sm text-red-600">PIN must be exactly 6 digits.</p>
-              }
-            </div>
-            <button type="submit" class="w-full bg-yellow-400 hover:bg-yellow-500 text-yellow-900 font-bold py-3 px-4 rounded-lg transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed" [disabled]="paying() || status() !== 'waiting'">
-              @if (paying()) { 
-                <span class="inline-block w-4 h-4 border-2 border-yellow-900/30 border-t-yellow-900 rounded-full animate-spin mr-2 align-middle"></span> Processing... 
-              } @else { 
-                <span class="inline-flex items-center gap-2">
-                  <app-icon name="check-circle" class="w-4 h-4"></app-icon>
-                  Submit Payment
-                </span>
-              }
-            </button>
-          </form>
-        </div>
       </div>
     </div>
   } @else {

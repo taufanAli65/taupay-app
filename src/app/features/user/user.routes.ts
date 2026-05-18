@@ -14,6 +14,14 @@ export const USER_ROUTES: Routes = [
       {
         path: 'profile',
         loadComponent: () => import('./profile/profile.component').then(m => m.UserProfileComponent)
+      },
+      {
+        path: 'transactions/history',
+        loadComponent: () => import('./transactions/transaction-history/transaction-history.component').then(m => m.UserTransactionHistoryComponent)
+      },
+      {
+        path: 'transactions/pay',
+        loadComponent: () => import('./transactions/pay/pay.component').then(m => m.UserPayComponent)
       }
     ]
   }

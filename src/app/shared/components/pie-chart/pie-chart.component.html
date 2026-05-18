@@ -1,0 +1,23 @@
+<div class="flex flex-col items-center">
+  <svg viewBox="0 0 200 200" class="w-44 h-44">
+    <g>
+      <ng-container *ngFor="let a of arcs">
+        <path [attr.d]="a.d" [attr.fill]="a.color"></path>
+      </ng-container>
+      <circle cx="100" cy="100" r="36" fill="white"></circle>
+      <text x="100" y="100" text-anchor="middle" dominant-baseline="middle" class="text-sm font-bold">
+        {{ total | currencyIdr }}
+      </text>
+    </g>
+  </svg>
+
+  <ul class="mt-3 w-full space-y-2">
+    <li *ngFor="let a of arcs" class="flex items-center justify-between text-sm">
+      <div class="flex items-center gap-2">
+        <span [style.background]="a.color" class="w-3 h-3 rounded-full inline-block"></span>
+        <span class="text-gray-700">{{ a.category }}</span>
+      </div>
+      <div class="text-gray-900 font-semibold">{{ a.amount | currencyIdr }}</div>
+    </li>
+  </ul>
+</div>
