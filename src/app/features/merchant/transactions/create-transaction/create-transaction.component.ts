@@ -4,6 +4,7 @@ import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CreateTransactionStore } from '../../state/create-transaction.store';
 import { TransactionService } from '@features/merchant/services/transaction.service';
+import { CartItem } from '@shared/models/transaction.model';
 import { CurrencyIdrPipe } from '@shared/pipes/currency-idr.pipe';
 import { ToastService } from '@shared/components/toast/toast.service';
 import { IconComponent } from '@shared/components/icon/icon.component';
@@ -25,6 +26,11 @@ export class CreateTransactionComponent implements OnInit {
 
   ngOnInit(): void {
     this.store.loadProducts();
+  }
+
+  isMaxStock(item: CartItem): boolean {
+    const product = this.store.products().find(p => p.id === item.productId);
+    return product ? item.quantity >= product.stock : false;
   }
 
   submitTransaction(): void {

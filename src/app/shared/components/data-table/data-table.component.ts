@@ -30,8 +30,22 @@ export class DataTableComponent {
   @Output() pageChange = new EventEmitter<number>();
 
   @Input() customTemplates: { [key: string]: TemplateRef<any> } = {};
+  @Input() expandableTemplate?: TemplateRef<any>;
+
+  expandedRowId: any = null;
 
   private searchTimeout?: any;
+
+  toggleRow(item: any) {
+    if (!this.expandableTemplate) return;
+    const itemId = item.id || item.trx_id || item.historyId;
+    this.expandedRowId = this.expandedRowId === itemId ? null : itemId;
+  }
+
+  isExpanded(item: any): boolean {
+    const itemId = item.id || item.trx_id || item.historyId;
+    return this.expandedRowId === itemId;
+  }
 
   onSearchChange(query: string) {
     if (this.searchTimeout) clearTimeout(this.searchTimeout);

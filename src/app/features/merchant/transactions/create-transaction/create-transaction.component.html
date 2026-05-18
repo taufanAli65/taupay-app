@@ -141,6 +141,8 @@
                 <span class="min-w-[24px] text-center font-black text-sm text-black">{{ item.quantity }}</span>
                 <button 
                   (click)="store.updateQty(item.productId, item.quantity + 1)"
+                  [class.opacity-50]="isMaxStock(item)"
+                  [class.cursor-not-allowed]="isMaxStock(item)"
                   class="w-7 h-7 flex items-center justify-center text-emerald-dark hover:bg-emerald-dark/10 rounded-lg transition-colors font-black text-xl leading-none">+</button>
               </div>
             </div>

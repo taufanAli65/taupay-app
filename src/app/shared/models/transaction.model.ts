@@ -30,6 +30,12 @@ export interface TransactionStatusEvent {
   total: number;
 }
 
+export interface HistoryProduct {
+  name: string;
+  quantity: number;
+  priceAtTime: number;
+}
+
 export interface TransactionHistoryItem {
   historyId?: string;
   trx_id?: string;
@@ -38,7 +44,7 @@ export interface TransactionHistoryItem {
   category?: string;
   createdAt?: string;
   created_at?: string;
-  products?: TransactionProduct[];
+  products?: HistoryProduct[];
 }
 
 export interface PaymentCallback {

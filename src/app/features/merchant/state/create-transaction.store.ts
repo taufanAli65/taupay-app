@@ -4,6 +4,7 @@ import { ProductService } from '../services/product.service';
 import { Product } from '@shared/models/product.model';
 import { CartItem } from '@shared/models/transaction.model';
 import { finalize } from 'rxjs';
+import { ToastService } from '@shared/components/toast/toast.service';
 
 interface CreateTransactionState {
   products: Product[];
@@ -21,6 +22,7 @@ export interface GroupedProducts {
 export class CreateTransactionStore {
   private productService = inject(ProductService);
   private destroyRef = inject(DestroyRef);
+  private toast = inject(ToastService);
 
   private state = signal<CreateTransactionState>({
     products: [],
@@ -96,6 +98,10 @@ export class CreateTransactionStore {
     const existing = currentCart.find(i => i.productId === product.id);
 
     if (existing) {
+      if (existing.quantity >= product.stock) {
+        this.toast.show(`Cannot add more. Stock limit for ${product.name} is ${product.stock}.`, 'warning');
+        return;
+      }
       const updatedCart = currentCart.map(i => 
         i.productId === product.id ? { ...i, quantity: i.quantity + 1 } : i
       );
@@ -116,6 +122,12 @@ export class CreateTransactionStore {
   updateQty(productId: string, qty: number) {
     if (qty <= 0) {
       this.patchState({ cart: this.state().cart.filter(i => i.productId !== productId) });
+      return;
+    }
+
+    const product = this.state().products.find(p => p.id === productId);
+    if (product && qty > product.stock) {
+      this.toast.show(`Cannot add more. Stock limit for ${product.name} is ${product.stock}.`, 'warning');
       return;
     }
     
