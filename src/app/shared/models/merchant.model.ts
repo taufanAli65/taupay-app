@@ -6,6 +6,7 @@ export interface MerchantProfile {
   categoryId: string;
   categoryName: string;
   active: boolean;
+  balance: number;
 }
 
 export interface MerchantCategory {
