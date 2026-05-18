@@ -130,8 +130,11 @@ export class TransactionDetailComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.status.set('expired');
-    this.finalizeStatus('QR payment expired. Redirecting to create a new transaction...', ['/merchant/transactions/new'], 'warning');
+    if (event.status === 'EXPIRED') {
+      this.status.set('expired');
+      this.finalizeStatus('QR payment expired. Redirecting to create a new transaction...', ['/merchant/transactions/new'], 'danger');
+      return;
+    }
   }
 
   private finalizeStatus(

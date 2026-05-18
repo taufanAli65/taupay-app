@@ -29,6 +29,7 @@ export class AdminMerchantDetailComponent implements OnInit, OnChanges {
 
   isNew = true;
   isModalMode = false;
+  isViewOnly = signal(false);
   saving = signal(false);
   categories = signal<MerchantCategory[]>([]);
 
@@ -76,6 +77,9 @@ export class AdminMerchantDetailComponent implements OnInit, OnChanges {
   private resetAndInit(id?: string | null) {
     this.form.reset();
     this.isNew = !id || id === 'new';
+    
+    this.isViewOnly.set(!this.isNew && !this.isModalMode);
+
     const emailControl = this.form.get('email');
     const passwordControl = this.form.get('password');
     
@@ -90,6 +94,12 @@ export class AdminMerchantDetailComponent implements OnInit, OnChanges {
     }
     emailControl?.updateValueAndValidity();
     passwordControl?.updateValueAndValidity();
+
+    if (this.isViewOnly()) {
+      this.form.disable();
+    } else {
+      this.form.enable();
+    }
   }
 
   private loadMerchant(id: string) {
@@ -118,7 +128,7 @@ export class AdminMerchantDetailComponent implements OnInit, OnChanges {
   }
 
   submit(): void {
-    if (this.form.invalid) {
+    if (this.form.invalid || this.isViewOnly()) {
       this.form.markAllAsTouched();
       return;
     }

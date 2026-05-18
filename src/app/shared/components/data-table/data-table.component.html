@@ -39,32 +39,61 @@
       <div class="w-8 h-8 border-4 border-emerald-light border-t-transparent rounded-full animate-spin"></div>
     </div>
   }
-
-  <div class="overflow-x-auto">
-    <table class="w-full text-left border-collapse">
-      <thead>
-        <tr class="bg-cream/50 text-gray-500 text-xs uppercase tracking-wider border-b border-cream-dark">
+<!-- Table Body -->
+<div class="overflow-x-auto">
+  <table class="w-full text-left border-collapse">
+    <thead>
+      <tr class="bg-cream/50 text-gray-500 text-xs uppercase tracking-wider border-b border-cream-dark">
+        @if (expandableTemplate) {
+          <th class="py-4 pl-6 pr-0 w-10"></th>
+        }
+        @for (col of columns; track col.key) {
+          <th class="py-4 px-6 font-semibold" [class]="col.className">
+            {{ col.label }}
+          </th>
+        }
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-cream-dark">
+      @for (item of data; track item.id || item.trx_id || item.historyId || $index) {
+        <!-- Main Row -->
+        <tr class="hover:bg-cream/20 transition-colors group" 
+            [class.cursor-pointer]="expandableTemplate"
+            (click)="toggleRow(item)">
+          @if (expandableTemplate) {
+            <td class="py-4 pl-6 pr-0">
+              <div class="w-6 h-6 flex items-center justify-center transition-transform duration-300"
+                   [class.rotate-90]="isExpanded(item)">
+                <svg viewBox="0 0 24 24" class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+              </div>
+            </td>
+          }
           @for (col of columns; track col.key) {
-            <th class="py-4 px-6 font-semibold" [class]="col.className">
-              {{ col.label }}
-            </th>
+            <td class="py-4 px-6" [class]="col.className">
+              @if (col.custom && customTemplates[col.key]) {
+                <ng-container [ngTemplateOutlet]="customTemplates[col.key]" [ngTemplateOutletContext]="{ $implicit: item }"></ng-container>
+              } @else {
+                <span class="text-sm font-medium text-black-soft">{{ item[col.key] }}</span>
+              }
+            </td>
           }
         </tr>
-      </thead>
-      <tbody class="divide-y divide-cream-dark">
-        @for (item of data; track item.id || $index) {
-          <tr class="hover:bg-cream/20 transition-colors group">
-            @for (col of columns; track col.key) {
-              <td class="py-4 px-6" [class]="col.className">
-                @if (col.custom && customTemplates[col.key]) {
-                  <ng-container [ngTemplateOutlet]="customTemplates[col.key]" [ngTemplateOutletContext]="{ $implicit: item }"></ng-container>
-                } @else {
-                  <span class="text-sm font-medium text-black-soft">{{ item[col.key] }}</span>
-                }
-              </td>
-            }
+        <!-- Expandable Row -->
+        @if (expandableTemplate && isExpanded(item)) {
+          <tr class="bg-cream/10">
+            <td [attr.colspan]="columns.length + 1" class="p-0">
+              <div class="animate-expand-y overflow-hidden border-b border-cream-dark">
+                <div class="p-6">
+                  <ng-container [ngTemplateOutlet]="expandableTemplate" [ngTemplateOutletContext]="{ $implicit: item }"></ng-container>
+                </div>
+              </div>
+            </td>
           </tr>
-        } @empty {
+        }
+      } @empty {
+
           <tr>
             <td [attr.colspan]="columns.length" class="py-12 text-center text-gray-400 font-medium">
               No data available.

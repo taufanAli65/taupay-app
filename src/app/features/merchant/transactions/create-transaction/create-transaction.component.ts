@@ -2,9 +2,8 @@ import { Component, inject, OnInit, PLATFORM_ID, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ProductService } from '@features/merchant/services/product.service';
+import { CreateTransactionStore } from '../../state/create-transaction.store';
 import { TransactionService } from '@features/merchant/services/transaction.service';
-import { Product } from '@shared/models/product.model';
 import { CartItem } from '@shared/models/transaction.model';
 import { CurrencyIdrPipe } from '@shared/pipes/currency-idr.pipe';
 import { ToastService } from '@shared/components/toast/toast.service';
@@ -17,66 +16,44 @@ import { IconComponent } from '@shared/components/icon/icon.component';
   templateUrl: './create-transaction.component.html'
 })
 export class CreateTransactionComponent implements OnInit {
-  private productService = inject(ProductService);
+  readonly store = inject(CreateTransactionStore);
   private transactionService = inject(TransactionService);
   private router = inject(Router);
   private toast = inject(ToastService);
   private platformId = inject(PLATFORM_ID);
 
-  products = signal<Product[]>([]);
-  cart = signal<CartItem[]>([]);
-  loading = signal(false);
-  search = '';
-
-  get filteredProducts(): () => Product[] {
-    return () => {
-      const s = this.search.toLowerCase();
-      return this.products().filter(p => p.name.toLowerCase().includes(s));
-    };
-  }
-
-  get total(): number {
-    return this.cart().reduce((sum, i) => sum + i.price * i.quantity, 0);
-  }
+  submitting = signal(false);
 
   ngOnInit(): void {
-    this.productService.getAll(0, 50).subscribe(r => this.products.set(r.data));
+    this.store.loadProducts();
   }
 
-  addToCart(p: Product): void {
-    if (!p.isActive || p.stock === 0) return;
-    this.cart.update(cart => {
-      const existing = cart.find(i => i.productId === p.id);
-      if (existing) {
-        return cart.map(i => i.productId === p.id ? { ...i, quantity: i.quantity + 1 } : i);
-      }
-      return [...cart, { productId: p.id, name: p.name, price: p.price, quantity: 1, imageUrl: p.imageUrl }];
-    });
+  isMaxStock(item: CartItem): boolean {
+    const product = this.store.products().find(p => p.id === item.productId);
+    return product ? item.quantity >= product.stock : false;
   }
 
-  updateQty(item: CartItem, qty: number): void {
-    if (qty <= 0) { this.cart.update(c => c.filter(i => i.productId !== item.productId)); return; }
-    this.cart.update(c => c.map(i => i.productId === item.productId ? { ...i, quantity: qty } : i));
-  }
+  submitTransaction(): void {
+    const cart = this.store.cart();
+    if (cart.length === 0) return;
 
-  clearCart(): void { this.cart.set([]); }
-
-  submit(): void {
-    if (this.cart().length === 0) return;
-    this.loading.set(true);
+    this.submitting.set(true);
+    
     this.transactionService.create({
-      products: this.cart().map(i => ({ product_id: i.productId, quantity: i.quantity }))
+      products: cart.map(i => ({ product_id: i.productId, quantity: i.quantity }))
     }).subscribe({
       next: res => {
-        this.toast.show('Transaction created!', 'success');
+        this.toast.show('Transaction created successfully!', 'success');
+        this.store.clearCart();
 
         if (isPlatformBrowser(this.platformId)) {
           this.transactionService.savePendingTransaction(res.data);
         }
 
-        this.router.navigate(['/merchant/transactions', res.data.trx_id], { state: { transaction: res.data } });
+        this.router.navigate(['/merchant/transactions', res.data.trx_id]);
+        this.submitting.set(false);
       },
-      error: () => this.loading.set(false)
+      error: () => this.submitting.set(false)
     });
   }
 }

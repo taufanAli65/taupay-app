@@ -181,7 +181,7 @@ export class TransactionService {
       }
     }
 
-    if (eventName !== 'payment' || dataLines.length === 0) {
+    if ((eventName !== 'payment' && eventName !== 'expired') || dataLines.length === 0) {
       return;
     }
 
@@ -212,6 +212,5 @@ function isTransactionStatusEvent(value: unknown): value is TransactionStatusEve
 
   const candidate = value as Partial<TransactionStatusEvent>;
   return typeof candidate.trx_id === 'string'
-    && typeof candidate.total === 'number'
     && (candidate.status === 'PAID' || candidate.status === 'FAILED' || candidate.status === 'EXPIRED');
 }
