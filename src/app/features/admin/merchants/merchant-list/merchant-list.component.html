@@ -69,8 +69,12 @@
 
 <ng-template #actionTpl let-m>
   <div class="flex justify-end gap-2">
-    <button (click)="openEditModal(m.id)" 
+    <a [routerLink]="['/admin/merchants', m.id]" 
        class="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-bold py-1.5 px-3 rounded-lg transition-all shadow-sm text-xs">
+      View
+    </a>
+    <button (click)="openEditModal(m.id)" 
+       class="bg-white border border-gray-300 hover:bg-gray-50 text-emerald-700 font-bold py-1.5 px-3 rounded-lg transition-all shadow-sm text-xs">
       Edit
     </button>
     @if (m.active) {
