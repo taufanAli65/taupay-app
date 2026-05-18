@@ -13,4 +13,5 @@ export interface UpdateUserRequest {
   lastName?: string;
   address?: string;
   birthDate?: string;
+  pin?: string;
 }

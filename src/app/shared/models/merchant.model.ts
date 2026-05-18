@@ -17,6 +17,7 @@ export interface UpdateMerchantRequest {
   name: string;
   categoryId: string;
   address: string;
+  pin?: string;
 }
 
 export interface CreateMerchantRequest {

@@ -43,8 +43,7 @@ export interface TransactionHistoryItem {
 
 export interface PaymentCallback {
   trx_id: string;
-  status: string;
-  payer_user_id: string;
+  pin: string;
 }
 
 export interface CartItem {

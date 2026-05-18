@@ -20,7 +20,8 @@ export class UserProfileComponent implements OnInit {
     firstName: [''],
     lastName: [''],
     address: [''],
-    birthDate: ['']
+    birthDate: [''],
+    pin: ['', Validators.pattern(/^\d{6}$/)]
   });
 
   ngOnInit(): void {
@@ -36,8 +37,17 @@ export class UserProfileComponent implements OnInit {
   }
 
   onSubmit(): void {
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+    const raw = this.form.getRawValue();
+    const payload = {
+      ...raw,
+      pin: raw.pin?.trim() ? raw.pin : undefined
+    };
     this.saving.set(true);
-    this.userService.updateMe(this.form.value as any).subscribe({
+    this.userService.updateMe(payload as any).subscribe({
       next: () => { this.toast.show('Profile updated!', 'success'); this.saving.set(false); },
       error: () => this.saving.set(false)
     });

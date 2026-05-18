@@ -1,6 +1,7 @@
 import { Component, inject, OnInit, OnDestroy, PLATFORM_ID, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TransactionService } from '@features/merchant/services/transaction.service';
 import { ToastService } from '@shared/components/toast/toast.service';
 import { Transaction, TransactionStatusEvent } from '@shared/models/transaction.model';
@@ -12,10 +13,11 @@ import { IconComponent } from '@shared/components/icon/icon.component';
 @Component({
   selector: 'app-transaction-detail',
   standalone: true,
-  imports: [CommonModule, RouterLink, CurrencyIdrPipe, QRCodeModule, IconComponent],
+  imports: [CommonModule, RouterLink, ReactiveFormsModule, CurrencyIdrPipe, QRCodeModule, IconComponent],
   templateUrl: './transaction-detail.component.html'
 })
 export class TransactionDetailComponent implements OnInit, OnDestroy {
+  private fb = inject(FormBuilder);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private transactionService = inject(TransactionService);
@@ -26,6 +28,9 @@ export class TransactionDetailComponent implements OnInit, OnDestroy {
   transaction = signal<Transaction | null>(null);
   status = signal<'waiting' | 'paid' | 'failed' | 'expired'>('waiting');
   paying = signal(false);
+  payForm = this.fb.group({
+    pin: ['', [Validators.required, Validators.pattern(/^\d{6}$/)]]
+  });
   private sseSub?: Subscription;
   private redirectTimer?: ReturnType<typeof setTimeout>;
   private terminalHandled = false;
@@ -68,15 +73,18 @@ export class TransactionDetailComponent implements OnInit, OnDestroy {
   }
 
   simulatePay(): void {
+    if (this.payForm.invalid) {
+      this.payForm.markAllAsTouched();
+      return;
+    }
+
     this.paying.set(true);
     this.transactionService.sendCallback({
       trx_id: this.trxId,
-      status: 'PAID',
-      payer_user_id: '00000000-0000-0000-0000-000000000000'
+      pin: this.payForm.getRawValue().pin ?? ''
     }).subscribe({
-      next: () => { this.status.set('paid'); this.toast.show('Payment simulated!', 'success'); this.paying.set(false); },
+      next: () => { this.status.set('paid'); this.toast.show('Payment submitted!', 'success'); this.paying.set(false); },
       error: () => {
-        this.toast.show('Payment simulation failed.', 'warning');
         this.paying.set(false);
       }
     });
