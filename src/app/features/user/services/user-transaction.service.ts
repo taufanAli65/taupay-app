@@ -24,6 +24,10 @@ export class UserTransactionService {
     return this.http.get<ApiResponse<TransactionHistoryItem[]>>(this.base, { params });
   }
 
+  getTransactionDetail(trxId: string) {
+    return this.http.get<ApiResponse<any>>(`${this.transactionBase}/${trxId}`);
+  }
+
   sendCallback(body: PaymentCallback) {
     return this.http.post<ApiResponse<void>>(`${this.transactionBase}/${encodeURIComponent(body.trx_id)}/callback`, body);
   }

@@ -30,7 +30,7 @@ export class ProductFormComponent implements OnInit, OnChanges {
 
   form = this.fb.group({
     name: ['', Validators.required],
-    price: [0, [Validators.required, Validators.min(0)]],
+    price: ['' as any, Validators.required],
     stock: [0, [Validators.required, Validators.min(0)]],
     categoryId: [''],
     description: ['']
@@ -54,7 +54,7 @@ export class ProductFormComponent implements OnInit, OnChanges {
   }
 
   private resetForm() {
-    this.form.reset({ name: '', price: 0, stock: 0, categoryId: '', description: '' });
+    this.form.reset({ name: '', price: '', stock: 0, categoryId: '', description: '' });
     this.previewUrl.set(null);
     this.selectedFile.set(null);
     this.isImageRemoved.set(false);
@@ -67,7 +67,7 @@ export class ProductFormComponent implements OnInit, OnChanges {
         const p = r.data;
         this.form.patchValue({
           name: p.name, 
-          price: p.price,
+          price: this.formatNumber(p.price) as any,
           stock: p.stock, 
           description: p.description,
           categoryId: p.category?.id
@@ -79,11 +79,30 @@ export class ProductFormComponent implements OnInit, OnChanges {
     });
   }
 
+  onPriceInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    let value = input.value.replace(/\D/g, ''); 
+    if (value) {
+      const formatted = this.formatNumber(parseInt(value, 10));
+      this.form.get('price')?.setValue(formatted as any, { emitEvent: false });
+    } else {
+      this.form.get('price')?.setValue('' as any, { emitEvent: false });
+    }
+  }
+
+  private formatNumber(n: number): string {
+    return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  }
+
+  private parseNumber(s: string): number {
+    return parseInt(s.toString().replace(/\./g, ''), 10) || 0;
+  }
+
   onFileChange(event: Event): void {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (!file) return;
     this.selectedFile.set(file);
-    this.isImageRemoved.set(false); // Reset flag if new file selected
+    this.isImageRemoved.set(false);
     const reader = new FileReader();
     reader.onload = e => this.previewUrl.set(e.target?.result as string);
     reader.readAsDataURL(file);
@@ -107,7 +126,7 @@ export class ProductFormComponent implements OnInit, OnChanges {
     
     const data = { 
       name: v.name!, 
-      price: v.price!, 
+      price: this.parseNumber(v.price || '0'), 
       stock: v.stock!, 
       description: v.description ?? '', 
       categoryId: v.categoryId || '',

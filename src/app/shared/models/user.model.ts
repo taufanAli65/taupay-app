@@ -6,6 +6,7 @@ export interface UserProfile {
   address: string;
   birthDate: string;
   isActive: boolean;
+  balance: number;
 }
 
 export interface UpdateUserRequest {

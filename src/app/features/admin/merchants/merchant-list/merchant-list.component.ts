@@ -8,11 +8,12 @@ import { TableColumn, TableFilter } from '@shared/components/data-table/data-tab
 import { FormModalComponent } from '@shared/components/modal/form-modal.component';
 import { AdminMerchantDetailComponent } from '../merchant-detail/merchant-detail.component';
 import { IconComponent } from '@shared/components/icon/icon.component';
+import { ModalComponent } from '@shared/components/modal/modal.component';
 
 @Component({
   selector: 'app-admin-merchant-list',
   standalone: true,
-  imports: [RouterLink, CommonModule, DataTableComponent, FormModalComponent, AdminMerchantDetailComponent, IconComponent],
+  imports: [RouterLink, CommonModule, DataTableComponent, FormModalComponent, AdminMerchantDetailComponent, IconComponent, ModalComponent],
   templateUrl: './merchant-list.component.html'
 })
 export class AdminMerchantListComponent implements OnInit {
@@ -21,6 +22,10 @@ export class AdminMerchantListComponent implements OnInit {
 
   showFormModal = signal(false);
   selectedMerchantId = signal<string | null>(null);
+
+  showStatusModal = signal(false);
+  merchantToToggle = signal<MerchantProfile | null>(null);
+  targetStatus = signal<boolean>(false);
 
   columns: TableColumn[] = [
     { key: 'merchant', label: 'Merchant', custom: true },
@@ -61,6 +66,7 @@ export class AdminMerchantListComponent implements OnInit {
     }
   }
 
+  // --- FORM MODAL ACTIONS ---
   openAddModal() {
     this.selectedMerchantId.set(null);
     this.showFormModal.set(true);
@@ -83,5 +89,25 @@ export class AdminMerchantListComponent implements OnInit {
   onMerchantSaved() {
     this.closeFormModal();
     this.store.loadPage(this.store.currentPage());
+  }
+
+  // --- STATUS TOGGLE ACTIONS ---
+  triggerStatusConfirm(m: MerchantProfile, activate: boolean) {
+    this.merchantToToggle.set(m);
+    this.targetStatus.set(activate);
+    this.showStatusModal.set(true);
+  }
+
+  confirmStatusToggle() {
+    const m = this.merchantToToggle();
+    if (m) {
+      this.store.toggleStatus(m, this.targetStatus());
+      this.closeStatusModal();
+    }
+  }
+
+  closeStatusModal() {
+    this.showStatusModal.set(false);
+    this.merchantToToggle.set(null);
   }
 }
