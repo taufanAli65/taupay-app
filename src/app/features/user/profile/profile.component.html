@@ -1,36 +1,50 @@
 <div class="animate-fade-in">
-  <div class="mb-8">
-    <h1 class="text-3xl font-bold text-black mb-1 tracking-tight">My Profile</h1>
-    <p class="text-black-soft">Manage your account information</p>
-  </div>
+  <div class="max-w-md mx-auto px-4 py-4">
+    <h1 class="text-2xl font-bold mb-2">My Profile</h1>
+    <p class="text-sm text-gray-600 mb-4">Manage your account information</p>
 
-  <div class="max-w-2xl">
-    <div class="bg-white border border-cream-dark rounded-xl p-8 shadow-sm">
-      <h3 class="text-xl font-bold mb-6">Personal Information</h3>
-      <form class="flex flex-col gap-5" [formGroup]="form" (ngSubmit)="onSubmit()">
-        <div class="grid grid-cols-2 gap-5">
-          <div class="flex flex-col gap-1.5">
-            <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">First Name</label>
-            <input type="text" class="w-full bg-cream border border-cream-dark rounded-md px-4 py-2.5 text-black focus:outline-none focus:border-emerald-dark focus:ring-1 focus:ring-emerald-dark transition-all" formControlName="firstName" />
-          </div>
-          <div class="flex flex-col gap-1.5">
-            <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">Last Name</label>
-            <input type="text" class="w-full bg-cream border border-cream-dark rounded-md px-4 py-2.5 text-black focus:outline-none focus:border-emerald-dark focus:ring-1 focus:ring-emerald-dark transition-all" formControlName="lastName" />
-          </div>
+    <div class="bg-white border border-cream-dark rounded-xl p-4 shadow-sm">
+      <form class="flex flex-col gap-4" [formGroup]="form" (ngSubmit)="onSubmit()">
+        <div class="flex flex-col">
+          <label class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">First Name</label>
+          <input type="text" formControlName="firstName"
+            class="w-full bg-cream border border-cream-dark rounded-md px-4 py-2.5" />
         </div>
-        <div class="flex flex-col gap-1.5">
-          <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">Address</label>
-          <input type="text" class="w-full bg-cream border border-cream-dark rounded-md px-4 py-2.5 text-black focus:outline-none focus:border-emerald-dark focus:ring-1 focus:ring-emerald-dark transition-all" formControlName="address" />
+
+        <div class="flex flex-col">
+          <label class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Last Name</label>
+          <input type="text" formControlName="lastName"
+            class="w-full bg-cream border border-cream-dark rounded-md px-4 py-2.5" />
         </div>
-        <div class="flex flex-col gap-1.5">
-          <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">Date of Birth</label>
-          <input type="date" class="w-full bg-cream border border-cream-dark rounded-md px-4 py-2.5 text-black focus:outline-none focus:border-emerald-dark focus:ring-1 focus:ring-emerald-dark transition-all" formControlName="birthDate" />
+
+        <div class="flex flex-col">
+          <label class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Address</label>
+          <input type="text" formControlName="address"
+            class="w-full bg-cream border border-cream-dark rounded-md px-4 py-2.5" />
         </div>
-        <button type="submit" class="bg-emerald-dark hover:bg-black text-white font-semibold py-3 px-6 rounded-md transition-all disabled:opacity-50 mt-2 self-start" [disabled]="saving()">
-          @if (saving()) { 
-            <span class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2 align-middle"></span> Saving... 
-          } @else { 
-            Save Changes 
+
+        <div class="flex flex-col">
+          <label class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Date of Birth</label>
+          <input type="date" formControlName="birthDate"
+            class="w-full bg-cream border border-cream-dark rounded-md px-4 py-2.5" />
+        </div>
+
+        <div class="flex flex-col">
+          <label class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Payment PIN</label>
+          <input type="password" inputmode="numeric" maxlength="6" formControlName="pin"
+            class="w-full bg-cream border border-cream-dark rounded-md px-4 py-2.5" placeholder="Leave blank to keep current PIN" />
+          @if (form.get('pin')?.invalid && form.get('pin')?.touched) {
+          <p class="text-sm text-red-600">PIN must be exactly 6 digits.</p>
+          }
+        </div>
+
+        <button type="submit" [disabled]="saving()"
+          class="w-full bg-emerald-dark hover:bg-black text-white font-semibold py-3 rounded-md transition-all">
+          @if (saving()) {
+          <span class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2 align-middle"></span>
+          Saving...
+          } @else {
+          Save Changes
           }
         </button>
       </form>

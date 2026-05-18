@@ -78,25 +78,6 @@
             <span class="text-xs text-gray-500 mt-2 font-medium">Scan with Wallet App to pay</span>
           </div>
         </div>
-
-        <!-- Demo: Simulate Payment Callback -->
-        <div class="bg-yellow-50 border-2 border-yellow-400 rounded-xl p-6 shadow-sm">
-          <h4 class="text-lg font-bold mb-2 text-yellow-800 flex items-center gap-2">
-            <app-icon name="bolt" class="w-4 h-4"></app-icon>
-            Demo: Simulate Payment
-          </h4>
-          <p class="text-yellow-700/80 text-sm mb-4 font-medium">Simulate the payment gateway callback for testing.</p>
-          <button class="w-full bg-yellow-400 hover:bg-yellow-500 text-yellow-900 font-bold py-3 px-4 rounded-lg transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed" [disabled]="paying() || status() !== 'waiting'" (click)="simulatePay()">
-            @if (paying()) { 
-              <span class="inline-block w-4 h-4 border-2 border-yellow-900/30 border-t-yellow-900 rounded-full animate-spin mr-2 align-middle"></span> Processing... 
-            } @else { 
-              <span class="inline-flex items-center gap-2">
-                <app-icon name="check-circle" class="w-4 h-4"></app-icon>
-                Simulate Payment
-              </span>
-            }
-          </button>
-        </div>
       </div>
     </div>
   } @else {
