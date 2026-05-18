@@ -22,7 +22,8 @@ export class MerchantProfileComponent implements OnInit {
   form = this.fb.group({
     name: ['', Validators.required],
     categoryId: ['', Validators.required],
-    address: ['', Validators.required]
+    address: ['', Validators.required],
+    pin: ['', Validators.pattern(/^\d{6}$/)]
   });
 
   ngOnInit(): void {
@@ -35,8 +36,13 @@ export class MerchantProfileComponent implements OnInit {
 
   onSubmit(): void {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
+    const raw = this.form.getRawValue();
+    const payload = {
+      ...raw,
+      pin: raw.pin?.trim() ? raw.pin : undefined
+    };
     this.saving.set(true);
-    this.merchantService.updateMe(this.form.value as any).subscribe({
+    this.merchantService.updateMe(payload as any).subscribe({
       next: () => { this.toast.show('Profile updated!', 'success'); this.saving.set(false); },
       error: () => this.saving.set(false)
     });

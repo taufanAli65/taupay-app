@@ -20,7 +20,9 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
         router.navigate(['/auth/login']);
         toast.show('Session expired. Please login again.', 'warning');
       } else if (status === 403) {
-        toast.show('Access denied. You do not have permission.', 'danger');
+        toast.show(message, 'danger');
+      } else if (status === 423) {
+        toast.show(message, 'warning');
       } else if (status === 404) {
         toast.show('Resource not found.', 'warning');
       } else if (status === 400) {

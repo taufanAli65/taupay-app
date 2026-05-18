@@ -40,6 +40,13 @@
         <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">Address *</label>
         <input type="text" class="w-full bg-cream border border-cream-dark rounded-md px-4 py-2.5 text-black focus:outline-none focus:border-emerald-dark focus:ring-1 focus:ring-emerald-dark transition-all" formControlName="address" />
       </div>
+      <div class="flex flex-col gap-1.5">
+        <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">Payment PIN</label>
+        <input type="password" inputmode="numeric" maxlength="6" class="w-full bg-cream border border-cream-dark rounded-md px-4 py-2.5 text-black focus:outline-none focus:border-emerald-dark focus:ring-1 focus:ring-emerald-dark transition-all" formControlName="pin" placeholder="Leave blank to keep current PIN" />
+        @if (form.get('pin')?.invalid && form.get('pin')?.touched) {
+          <p class="text-sm text-red-600">PIN must be exactly 6 digits.</p>
+        }
+      </div>
       <button type="submit" class="bg-emerald-dark hover:bg-black text-white font-semibold py-3 px-6 rounded-md transition-all disabled:opacity-50 mt-2 self-start" [disabled]="saving()">
         @if (saving()) { 
           <span class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2 align-middle"></span> Saving... 
