@@ -35,7 +35,7 @@
             </button>
             <button type="button" (click)="triggerQrUpload()" [disabled]="paying() || qrLoading() || cameraStarting()"
               class="flex-1 bg-white border border-cream-dark text-black py-2 rounded-md transition-all active:scale-95">
-              @if (qrLoading()) { <span class="inline-block w-4 h-4 border-2 border-emerald-dark/30 border-t-emerald-dark rounded-full animate-spin"></span> Reading... } @else { <app-icon name="upload" class="w-4 h-4"></app-icon> Upload }
+              @if (qrLoading()) { <span class="inline-block w-4 h-4 border-2 border-emerald-dark/30 border-t-emerald-dark rounded-full animate-spin"></span> Reading... } @else { <app-icon name="camera" class="w-4 h-4"></app-icon> Upload }
             </button>
           </div>
 
