@@ -54,7 +54,7 @@ export class UserTransactionHistoryComponent implements OnInit {
   itemAmount(item: TransactionHistoryItem): number {
     if (typeof item.amount === 'number') return item.amount;
     if (item.products?.length) {
-      return item.products.reduce((sum, p) => sum + p.price * p.quantity, 0);
+      return item.products.reduce((sum, p) => sum + p.priceAtTime * p.quantity, 0);
     }
     return 0;
   }

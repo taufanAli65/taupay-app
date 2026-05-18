@@ -54,7 +54,7 @@ export class UserDashboardComponent implements OnInit {
       const category = it.category ?? 'Uncategorized';
       let amount = typeof it.amount === 'number' ? it.amount : 0;
       if (!amount && it.products?.length) {
-        amount = it.products.reduce((s, p) => s + (p.price ?? 0) * (p.quantity ?? 0), 0);
+        amount = it.products.reduce((s, p) => s + (p.priceAtTime ?? 0) * (p.quantity ?? 0), 0);
       }
       total += amount;
       grouped.set(category, (grouped.get(category) ?? 0) + amount);
