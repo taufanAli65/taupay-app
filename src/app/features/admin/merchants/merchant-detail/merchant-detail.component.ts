@@ -3,9 +3,8 @@ import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AdminMerchantService } from '@features/admin/services/admin-merchant.service';
+import { AdminMerchantDetailStore } from '@features/admin/state/admin-merchant-detail.store';
 import { ToastService } from '@shared/components/toast/toast.service';
-import { MerchantCategory } from '@shared/models/merchant.model';
-import { Product } from '@shared/models/product.model';
 import { DataTableComponent } from '@shared/components/data-table/data-table.component';
 import { TableColumn } from '@shared/components/data-table/data-table.model';
 import { CurrencyIdrPipe } from '@shared/pipes/currency-idr.pipe';
@@ -24,20 +23,21 @@ export class AdminMerchantDetailComponent implements OnInit, OnChanges {
 
   private fb = inject(FormBuilder);
   private merchantService = inject(AdminMerchantService);
+  private merchantStore = inject(AdminMerchantDetailStore);
   private route = inject(ActivatedRoute);
   private toast = inject(ToastService);
 
   isNew = true;
   isModalMode = false;
   isViewOnly = signal(false);
-  saving = signal(false);
-  categories = signal<MerchantCategory[]>([]);
+  saving = this.merchantStore.saving;
+  categories = this.merchantStore.categories;
 
-  products = signal<Product[]>([]);
-  loadingProducts = signal(false);
-  currentPage = signal(0);
-  totalPages = signal(1);
-  totalElements = signal(0);
+  products = this.merchantStore.products;
+  loadingProducts = this.merchantStore.loadingProducts;
+  currentPage = this.merchantStore.currentPage;
+  totalPages = this.merchantStore.totalPages;
+  totalElements = this.merchantStore.totalElements;
 
   productColumns: TableColumn[] = [
     { key: 'imageUrl', label: 'Image', custom: true },
@@ -56,7 +56,7 @@ export class AdminMerchantDetailComponent implements OnInit, OnChanges {
   });
 
   ngOnInit(): void {
-    this.merchantService.getCategories().subscribe(r => this.categories.set(r.data));
+    this.merchantStore.loadCategories().subscribe();
     
     const routeId = this.route.snapshot.paramMap.get('id');
     if (routeId) {
@@ -114,17 +114,7 @@ export class AdminMerchantDetailComponent implements OnInit, OnChanges {
 
   loadProducts(page: number): void {
     if (this.isNew || !this.merchantId) return;
-    this.loadingProducts.set(true);
-    this.merchantService.getMerchantProducts(this.merchantId, page, 10).subscribe({
-      next: r => {
-        this.products.set(r.data ?? []);
-        this.currentPage.set(r.pagination?.page ?? page);
-        this.totalPages.set(r.pagination?.totalPages ?? 1);
-        this.totalElements.set(r.pagination?.totalElements ?? 0);
-        this.loadingProducts.set(false);
-      },
-      error: () => this.loadingProducts.set(false)
-    });
+    this.merchantStore.loadProducts(this.merchantId, page, 10).subscribe();
   }
 
   submit(): void {
@@ -133,30 +123,32 @@ export class AdminMerchantDetailComponent implements OnInit, OnChanges {
       return;
     }
 
-    this.saving.set(true);
     const v = this.form.value;
     
-    const call = this.isNew
-      ? this.merchantService.create({
-          name: v.name!,
-          categoryId: v.categoryId!,
-          address: v.address!,
-          email: v.email!,
-          password: v.password!
-        })
-      : this.merchantService.update(this.merchantId!, {
-          name: v.name!,
-          categoryId: v.categoryId!,
-          address: v.address!
-        });
+    const call = this.merchantStore.saveMerchant(
+      this.merchantId,
+      this.isNew
+        ? {
+            name: v.name!,
+            categoryId: v.categoryId!,
+            address: v.address!,
+            email: v.email!,
+            password: v.password!
+          }
+        : {
+            name: v.name!,
+            categoryId: v.categoryId!,
+            address: v.address!
+          },
+      this.isNew
+    );
 
     call.subscribe({
       next: () => {
         this.toast.show(this.isNew ? 'Merchant created!' : 'Merchant updated!', 'success');
         this.onSaved.emit();
-        this.saving.set(false);
       },
-      error: () => this.saving.set(false)
+      error: () => { }
     });
   }
 }

@@ -1,13 +1,9 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
-import { AuthService } from '../services/auth.service';
+import { AuthStore } from '../state/auth.store';
 import { ToastService } from '@shared/components/toast/toast.service';
-import { MerchantCategory } from '@shared/models/merchant.model';
-import { ApiResponse } from '@shared/models/api-response.model';
-import { environment } from '@env';
 import { IconComponent } from '@shared/components/icon/icon.component';
 
 @Component({
@@ -18,13 +14,12 @@ import { IconComponent } from '@shared/components/icon/icon.component';
 })
 export class RegisterMerchantComponent implements OnInit {
   private fb = inject(FormBuilder);
-  private http = inject(HttpClient);
-  private authService = inject(AuthService);
+  private authStore = inject(AuthStore);
   private toast = inject(ToastService);
   private router = inject(Router);
 
-  loading = signal(false);
-  categories = signal<MerchantCategory[]>([]);
+  loading = this.authStore.loading;
+  categories = this.authStore.categories;
 
   form = this.fb.group({
     name: ['', Validators.required],
@@ -35,9 +30,7 @@ export class RegisterMerchantComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    this.http.get<ApiResponse<MerchantCategory[]>>(
-      `${environment.apiUrl}/api/v1/merchant/category`
-    ).subscribe(res => this.categories.set(res.data));
+    this.authStore.loadMerchantCategories().subscribe();
   }
 
   isInvalid(f: string): boolean {
@@ -47,9 +40,8 @@ export class RegisterMerchantComponent implements OnInit {
 
   onSubmit(): void {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
-    this.loading.set(true);
     const v = this.form.value;
-    this.authService.registerMerchant({
+    this.authStore.registerMerchant({
       name: v.name!, categoryId: v.categoryId!,
       address: v.address!, email: v.email!, password: v.password!
     }).subscribe({
@@ -57,7 +49,7 @@ export class RegisterMerchantComponent implements OnInit {
         this.toast.show('Merchant account created! Please login.', 'success');
         this.router.navigate(['/auth/login']);
       },
-      error: () => this.loading.set(false)
+      error: () => { }
     });
   }
 }

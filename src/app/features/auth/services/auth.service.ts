@@ -1,4 +1,4 @@
-import { Injectable, signal, inject } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { tap } from 'rxjs';
@@ -18,21 +18,16 @@ export class AuthService {
 
   private readonly base = `${environment.apiUrl}/api/v1/auth`;
 
-  isLoading = signal(false);
-
   login(body: LoginRequest) {
-    this.isLoading.set(true);
     return this.http.post<ApiResponse<LoginResponse>>(`${this.base}/login`, body).pipe(
       tap({
         next: res => {
           this.tokenService.setToken(res.data.token);
-          this.isLoading.set(false);
           const role = this.tokenService.getRole();
           if (role === 'USER') this.router.navigate(['/user/dashboard']);
           else if (role === 'MERCHANT') this.router.navigate(['/merchant/dashboard']);
           else if (role === 'SUPER_ADMIN') this.router.navigate(['/admin/dashboard']);
         },
-        error: () => this.isLoading.set(false)
       })
     );
   }

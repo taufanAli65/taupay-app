@@ -1,8 +1,7 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '@features/auth/services/auth.service';
-import { MerchantService } from '@features/merchant/services/merchant.service';
-import { TokenStorageService } from '@core/services/token-storage.service';
+import { MerchantLayoutStore } from '@features/merchant/state/merchant-layout.store';
 import { IconComponent } from '@shared/components/icon/icon.component';
 
 @Component({
@@ -13,9 +12,8 @@ import { IconComponent } from '@shared/components/icon/icon.component';
 })
 export class MerchantLayoutComponent implements OnInit {
   private authService = inject(AuthService);
-  private merchantService = inject(MerchantService);
-  private tokenService = inject(TokenStorageService);
-  merchantName = signal('Merchant');
+  private merchantLayoutStore = inject(MerchantLayoutStore);
+  merchantName = this.merchantLayoutStore.merchantName;
   collapsed = signal(false);
 
   get initials(): string {
@@ -23,7 +21,7 @@ export class MerchantLayoutComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.merchantService.getMe().subscribe(res => this.merchantName.set(res.data.name));
+    this.merchantLayoutStore.loadMerchantName();
   }
 
   toggleSidebar(): void { this.collapsed.update(v => !v); }
