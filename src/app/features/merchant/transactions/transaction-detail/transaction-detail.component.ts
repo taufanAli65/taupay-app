@@ -113,20 +113,40 @@ export class TransactionDetailComponent implements OnInit, OnDestroy {
 
   private startCountdown(): void {
     this.stopCountdown();
-    this.countdownTimer = setInterval(() => {
+    
+    let targetTimeMs: number;
+    const trx = this.transaction();
+    
+    if (trx && trx.created_at) {
+      targetTimeMs = new Date(trx.created_at).getTime() + (5 * 60 * 1000);
+    } else {
+      targetTimeMs = Date.now() + (5 * 60 * 1000);
+    }
+
+    const updateTimer = () => {
       if (this.status() !== 'waiting') {
         this.stopCountdown();
         return;
       }
       
-      if (this.countdown() <= 0) {
+      const now = Date.now();
+      const remainingSecs = Math.max(0, Math.floor((targetTimeMs - now) / 1000));
+      this.countdown.set(remainingSecs);
+
+      if (remainingSecs <= 0) {
         this.status.set('expired');
         this.stopCountdown();
-        return;
+        if (!this.terminalHandled) {
+          this.finalizeStatus('QR payment expired. Redirecting to new transaction...', ['/merchant/transactions/new'], 'danger');
+        }
       }
-      
-      this.countdown.update(c => c - 1);
-    }, 1000);
+    };
+
+    updateTimer();
+    
+    if (this.status() === 'waiting' && this.countdown() > 0) {
+      this.countdownTimer = setInterval(updateTimer, 1000);
+    }
   }
 
   private stopCountdown(): void {
