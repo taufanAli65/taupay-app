@@ -42,7 +42,7 @@ export class TransactionDetailComponent implements OnInit, OnDestroy {
 
   private sseSub?: Subscription;
   private redirectTimer?: ReturnType<typeof setTimeout>;
-  private countdownTimer?: any;
+  private countdownTimer?: ReturnType<typeof setInterval>;
   private terminalHandled = false;
 
   get statusLabel(): string {

@@ -95,7 +95,13 @@
               <div class="w-[200px] h-[200px] flex items-center justify-center bg-gray-100 rounded-lg opacity-50 relative overflow-hidden grayscale">
                 <qrcode [qrdata]="t.trx_id" [width]="200" [errorCorrectionLevel]="'M'"></qrcode>
                 <div class="absolute inset-0 flex items-center justify-center bg-black/10">
-                   <span class="bg-white px-4 py-2 rounded-lg font-black uppercase text-xs tracking-widest text-red-600 shadow-xl border-2 border-red-100">{{ status() }}</span>
+                    @if (status() === 'paid') {
+                      <span class="bg-white px-4 py-2 rounded-lg font-black uppercase text-xs tracking-widest text-emerald-600 shadow-xl border-2 border-emerald-100">{{ status() }}</span>
+                    } @else if (status() === 'expired') {
+                      <span class="bg-white px-4 py-2 rounded-lg font-black uppercase text-xs tracking-widest text-orange-600 shadow-xl border-2 border-orange-100">{{ status() }}</span>
+                    } @else {
+                      <span class="bg-white px-4 py-2 rounded-lg font-black uppercase text-xs tracking-widest text-red-600 shadow-xl border-2 border-red-100">{{ status() }}</span>
+                    }
                 </div>
               </div>
               <p class="mt-4 text-xs font-bold text-gray-400 uppercase tracking-widest">QR Code Inactive</p>
