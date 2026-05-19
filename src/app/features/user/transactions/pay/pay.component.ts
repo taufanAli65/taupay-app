@@ -210,7 +210,7 @@ export class UserPayComponent implements OnInit, OnDestroy {
       error: () => {
         this.qrLoading.set(false);
         this.toast.show('Invalid Transaction ID or server error.', 'danger');
-        this.scanError.set('Transaction not found. Please check the ID.');
+        this.scanError.set('QR code does not correspond to a valid transaction. Please try again.');
       }
     });
   }
@@ -301,7 +301,7 @@ export class UserPayComponent implements OnInit, OnDestroy {
         this.paying.set(false);
         this.step.set('result');
         this.redirectTimer = setTimeout(() => {
-          void this.router.navigate(['/user/transactions/history']);
+          void this.router.navigate(['user/dashboard']);
         }, 1500);
       },
       error: () => {
@@ -366,6 +366,6 @@ export class UserPayComponent implements OnInit, OnDestroy {
 
   goBack(): void {
     this.resetFlow();
-    void this.router.navigate(['/user/transactions/history']);
+    void this.router.navigate(['user/dashboard']);
   }
 }

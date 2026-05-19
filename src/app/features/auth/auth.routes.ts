@@ -6,6 +6,14 @@ export const AUTH_ROUTES: Routes = [
     loadComponent: () => import('./login/login.component').then(m => m.LoginComponent)
   },
   {
+    path: 'account-locked',
+    loadComponent: () => import('./account-locked/account-locked.component').then(m => m.AccountLockedComponent)
+  },
+  {
+    path: 'account-inactive',
+    loadComponent: () => import('./account-inactive/account-inactive.component').then(m => m.AccountInactiveComponent)
+  },
+  {
     path: 'register',
     loadComponent: () => import('./register/register.component').then(m => m.RegisterComponent)
   },
