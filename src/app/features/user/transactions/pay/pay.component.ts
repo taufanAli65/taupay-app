@@ -209,8 +209,7 @@ export class UserPayComponent implements OnInit, OnDestroy {
       },
       error: () => {
         this.qrLoading.set(false);
-        this.toast.show('Invalid Transaction ID or server error.', 'danger');
-        this.scanError.set('QR code does not correspond to a valid transaction. Please try again.');
+        this.scanError.set('Transaction not found or expired.');
       }
     });
   }
@@ -294,7 +293,7 @@ export class UserPayComponent implements OnInit, OnDestroy {
       trx_id: trxIdValue,
       pin: pinValue,
       status: 'PAID'
-    } as any).subscribe({
+    }).subscribe({
       next: () => {
         this.status.set('paid');
         this.toast.show('Payment successful!', 'success');
@@ -311,19 +310,6 @@ export class UserPayComponent implements OnInit, OnDestroy {
         this.focusPinInput();
       }
     });
-
-    if (trxIdValue) {
-      this.sseSub = this.userTransactionService.subscribeToStatus(trxIdValue).subscribe({
-        next: (event: TransactionStatusEvent) => {
-          if (event.status === 'PAID') {
-            this.status.set('paid');
-          } else if (event.status === 'FAILED') {
-            this.status.set('failed');
-          }
-        },
-        error: () => {}
-      });
-    }
   }
 
   ngOnDestroy(): void {

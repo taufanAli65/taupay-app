@@ -46,18 +46,6 @@
             </div>
           }
 
-          <!-- Manual Input Fallback -->
-          <!-- <div class="mt-6 pt-6 border-t border-cream-dark">
-            <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 text-center">Or enter manually</p>
-            <div class="flex gap-2">
-              <input type="text" #manualTrxId placeholder="Enter TRX ID (e.g. TRX-123)"
-                class="flex-1 bg-cream/30 border border-cream-dark rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-light transition-all uppercase font-mono">
-              <button (click)="processDetectedTrx(manualTrxId.value)" 
-                class="bg-black text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-emerald-dark transition-colors">
-                Next
-              </button>
-            </div>
-          </div> -->
         </div>
       }
 
@@ -69,22 +57,6 @@
             </div>
             <h2 class="text-xl font-bold text-black uppercase tracking-tight">Payment Detail</h2>
             <p class="text-xs text-gray-400 font-mono mt-1 uppercase tracking-tighter">{{ transactionDetail()?.trxId }}</p>
-          </div>
-
-          <!-- Product List -->
-          <div class="flex flex-col gap-2 mb-6">
-            <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">Items</p>
-            <div class="max-h-48 overflow-y-auto space-y-2 pr-1 custom-scrollbar">
-              @for (item of transactionDetail()?.products; track $index) {
-                <div class="flex justify-between items-center p-3 bg-cream/20 rounded-xl border border-cream-dark/50">
-                  <div class="min-w-0">
-                    <p class="text-sm font-bold text-black truncate">{{ item.name }}</p>
-                    <p class="text-[10px] text-gray-400 font-bold uppercase">{{ item.quantity }}x {{ item.price | currencyIdr }}</p>
-                  </div>
-                  <p class="text-sm font-black text-black shrink-0">{{ (item.price * item.quantity) | currencyIdr }}</p>
-                </div>
-              }
-            </div>
           </div>
 
           <div class="bg-emerald-dark rounded-xl p-4 mb-6 shadow-lg shadow-emerald-dark/10">

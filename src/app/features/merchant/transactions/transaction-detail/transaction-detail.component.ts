@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, OnDestroy, PLATFORM_ID, signal } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, PLATFORM_ID, signal, computed } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -28,11 +28,21 @@ export class TransactionDetailComponent implements OnInit, OnDestroy {
   transaction = signal<Transaction | null>(null);
   status = signal<'waiting' | 'paid' | 'failed' | 'expired'>('waiting');
   paying = signal(false);
+
+  countdown = signal(300);
+  countdownDisplay = computed(() => {
+    const min = Math.floor(this.countdown() / 60);
+    const sec = this.countdown() % 60;
+    return `${min}:${sec.toString().padStart(2, '0')}`;
+  });
+
   payForm = this.fb.group({
     pin: ['', [Validators.required, Validators.pattern(/^\d{6}$/)]]
   });
+
   private sseSub?: Subscription;
   private redirectTimer?: ReturnType<typeof setTimeout>;
+  private countdownTimer?: ReturnType<typeof setInterval>;
   private terminalHandled = false;
 
   get statusLabel(): string {
@@ -58,6 +68,8 @@ export class TransactionDetailComponent implements OnInit, OnDestroy {
       this.toast.show('Transaction details could not be restored. Waiting for live status only.', 'warning');
     }
 
+    this.startCountdown();
+
     this.sseSub = this.transactionService.subscribeToStatus(this.trxId).subscribe({
       next: event => this.handleStatusEvent(event),
       error: () => {
@@ -81,7 +93,8 @@ export class TransactionDetailComponent implements OnInit, OnDestroy {
     this.paying.set(true);
     this.transactionService.sendCallback({
       trx_id: this.trxId,
-      pin: this.payForm.getRawValue().pin ?? ''
+      pin: this.payForm.getRawValue().pin ?? '',
+      status: 'PAID'
     }).subscribe({
       next: () => { this.status.set('paid'); this.toast.show('Payment submitted!', 'success'); this.paying.set(false); },
       error: () => {
@@ -92,8 +105,34 @@ export class TransactionDetailComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.stopStatusStream();
+    this.stopCountdown();
     if (this.redirectTimer) {
       clearTimeout(this.redirectTimer);
+    }
+  }
+
+  private startCountdown(): void {
+    this.stopCountdown();
+    this.countdownTimer = setInterval(() => {
+      if (this.status() !== 'waiting') {
+        this.stopCountdown();
+        return;
+      }
+      
+      if (this.countdown() <= 0) {
+        this.status.set('expired');
+        this.stopCountdown();
+        return;
+      }
+      
+      this.countdown.update(c => c - 1);
+    }, 1000);
+  }
+
+  private stopCountdown(): void {
+    if (this.countdownTimer) {
+      clearInterval(this.countdownTimer);
+      this.countdownTimer = undefined;
     }
   }
 
@@ -120,7 +159,7 @@ export class TransactionDetailComponent implements OnInit, OnDestroy {
 
     if (event.status === 'PAID') {
       this.status.set('paid');
-      this.finalizeStatus('Payment received. Redirecting to transaction history...', ['/merchant/transactions/history'], 'success');
+      this.finalizeStatus('Payment received. Redirecting to new transaction...', ['/merchant/transactions/new'], 'success');
       return;
     }
 
@@ -143,6 +182,7 @@ export class TransactionDetailComponent implements OnInit, OnDestroy {
     toastType: 'success' | 'danger' | 'warning'
   ): void {
     this.terminalHandled = true;
+    this.stopCountdown();
     this.transactionService.clearPendingTransaction(this.trxId);
     this.stopStatusStream();
     this.toast.show(message, toastType);
