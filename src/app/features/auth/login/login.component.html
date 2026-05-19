@@ -44,8 +44,8 @@
       </div>
 
       <button type="submit" class="w-full bg-emerald-dark hover:bg-black text-white font-semibold py-3 px-4 rounded-md transition-all disabled:opacity-50 disabled:cursor-not-allowed mt-2"
-        [disabled]="form.invalid || authService.isLoading()">
-        @if (authService.isLoading()) {
+        [disabled]="form.invalid || authStore.loading()">
+        @if (authStore.loading()) {
           <span class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2 align-middle"></span> Signing in...
         } @else {
           Sign in

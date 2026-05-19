@@ -2,8 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { AuthService } from '../services/auth.service';
-import { ToastService } from '@shared/components/toast/toast.service';
+import { AuthStore } from '../state/auth.store';
 import { IconComponent } from '@shared/components/icon/icon.component';
 
 @Component({
@@ -14,8 +13,7 @@ import { IconComponent } from '@shared/components/icon/icon.component';
 })
 export class LoginComponent {
   private fb = inject(FormBuilder);
-  authService = inject(AuthService);
-  private toast = inject(ToastService);
+  authStore = inject(AuthStore);
   showPass = signal(false);
 
   form = this.fb.group({
@@ -31,7 +29,7 @@ export class LoginComponent {
   onSubmit(): void {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
     const { email, password } = this.form.value;
-    this.authService.login({ email: email!, password: password! })
+    this.authStore.login({ email: email!, password: password! })
       .subscribe({
         error: () => { }
       });

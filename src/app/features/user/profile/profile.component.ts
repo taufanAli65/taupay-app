@@ -1,7 +1,7 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { UserService } from '@features/user/services/user.service';
+import { UserProfileStore } from '@features/user/state/user-profile.store';
 import { ToastService } from '@shared/components/toast/toast.service';
 
 @Component({
@@ -12,9 +12,9 @@ import { ToastService } from '@shared/components/toast/toast.service';
 })
 export class UserProfileComponent implements OnInit {
   private fb = inject(FormBuilder);
-  private userService = inject(UserService);
+  private profileStore = inject(UserProfileStore);
   private toast = inject(ToastService);
-  saving = signal(false);
+  saving = this.profileStore.saving;
 
   form = this.fb.group({
     firstName: [''],
@@ -25,7 +25,7 @@ export class UserProfileComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    this.userService.getMe().subscribe(res => {
+    this.profileStore.loadProfile().subscribe(res => {
       const p = res.data;
       this.form.patchValue({
         firstName: p.firstName,
@@ -46,10 +46,9 @@ export class UserProfileComponent implements OnInit {
       ...raw,
       pin: raw.pin?.trim() ? raw.pin : undefined
     };
-    this.saving.set(true);
-    this.userService.updateMe(payload as any).subscribe({
-      next: () => { this.toast.show('Profile updated!', 'success'); this.saving.set(false); },
-      error: () => this.saving.set(false)
+    this.profileStore.updateProfile(payload as any).subscribe({
+      next: () => { this.toast.show('Profile updated!', 'success'); },
+      error: () => { }
     });
   }
 }

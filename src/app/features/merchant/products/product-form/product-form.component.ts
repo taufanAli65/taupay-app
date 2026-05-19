@@ -1,9 +1,8 @@
 import { Component, inject, OnInit, signal, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
 import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { ProductService } from '@features/merchant/services/product.service';
+import { ProductFormStore } from '@features/merchant/state/product-form.store';
 import { ToastService } from '@shared/components/toast/toast.service';
-import { ProductCategory } from '@shared/models/product.model';
 import { IconComponent } from '@shared/components/icon/icon.component';
 
 @Component({
@@ -18,12 +17,12 @@ export class ProductFormComponent implements OnInit, OnChanges {
   @Output() onCancel = new EventEmitter<void>();
 
   private fb = inject(FormBuilder);
-  private productService = inject(ProductService);
+  private productStore = inject(ProductFormStore);
   private toast = inject(ToastService);
 
   isEdit = false;
-  loading = signal(false);
-  categories = signal<ProductCategory[]>([]);
+  loading = this.productStore.loading;
+  categories = this.productStore.categories;
   selectedFile = signal<File | null>(null);
   previewUrl = signal<string | null>(null);
   isImageRemoved = signal(false);
@@ -37,7 +36,7 @@ export class ProductFormComponent implements OnInit, OnChanges {
   });
 
   ngOnInit(): void {
-    this.productService.getCategories().subscribe(r => this.categories.set(r.data));
+    this.productStore.loadCategories().subscribe();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -61,8 +60,7 @@ export class ProductFormComponent implements OnInit, OnChanges {
   }
 
   private loadProduct(id: string) {
-    this.loading.set(true);
-    this.productService.getById(id).subscribe({
+    this.productStore.loadProduct(id).subscribe({
       next: r => {
         const p = r.data;
         this.form.patchValue({
@@ -73,9 +71,8 @@ export class ProductFormComponent implements OnInit, OnChanges {
           categoryId: p.category?.id
         });
         if (p.imageUrl) this.previewUrl.set(p.imageUrl);
-        this.loading.set(false);
       },
-      error: () => this.loading.set(false)
+      error: () => { }
     });
   }
 
@@ -121,7 +118,6 @@ export class ProductFormComponent implements OnInit, OnChanges {
 
   submit(): void {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
-    this.loading.set(true);
     const v = this.form.value;
     
     const data = { 
@@ -133,17 +129,14 @@ export class ProductFormComponent implements OnInit, OnChanges {
       isImageRemoved: this.isImageRemoved() 
     };
 
-    const call = this.isEdit && this.productId
-      ? this.productService.update(this.productId, data, this.selectedFile() ?? undefined)
-      : this.productService.create(data, this.selectedFile() ?? undefined);
+    const call = this.productStore.saveProduct(this.productId, data, this.selectedFile() ?? undefined, this.isEdit);
 
     call.subscribe({
       next: () => {
         this.toast.show(this.isEdit ? 'Product updated!' : 'Product created!', 'success');
         this.onSaved.emit();
-        this.loading.set(false);
       },
-      error: () => this.loading.set(false)
+      error: () => { }
     });
   }
 }
