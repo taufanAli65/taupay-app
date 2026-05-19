@@ -51,13 +51,23 @@ export class UserTransactionHistoryStore {
     ).pipe(
       finalize(() => this.patchState({ loading: false })),
       takeUntilDestroyed(this.destroyRef)
-    ).subscribe(r => {
-      this.patchState({
-        items: r.data ?? [],
-        currentPage: r.pagination?.page ?? page,
-        totalPages: r.pagination?.totalPages ?? 1,
-        totalElements: r.pagination?.totalElements ?? 0
-      });
+    ).subscribe({
+      next: r => {
+        this.patchState({
+          items: r.data ?? [],
+          currentPage: r.pagination?.page ?? page,
+          totalPages: r.pagination?.totalPages ?? 1,
+          totalElements: r.pagination?.totalElements ?? 0
+        });
+      },
+      error: () => {
+        this.patchState({
+          items: [],
+          currentPage: page,
+          totalPages: 1,
+          totalElements: 0
+        });
+      }
     });
   }
 
