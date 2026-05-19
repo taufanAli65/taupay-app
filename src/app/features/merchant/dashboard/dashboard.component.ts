@@ -8,11 +8,14 @@ import { DataTableComponent } from '@shared/components/data-table/data-table.com
 import { TableColumn } from '@shared/components/data-table/data-table.model';
 import { FormModalComponent } from '@shared/components/modal/form-modal.component';
 import { ProductFormComponent } from '../products/product-form/product-form.component';
+import { TransactionHistoryItem } from '@shared/models/transaction.model';
+import { SparklineChartComponent } from '@shared/components/sparkline-chart/sparkline-chart.component';
+import { computed } from '@angular/core';
 
 @Component({
   selector: 'app-merchant-dashboard',
   standalone: true,
-  imports: [RouterLink, CommonModule, CurrencyIdrPipe, IconComponent, DataTableComponent, FormModalComponent, ProductFormComponent],
+  imports: [RouterLink, CommonModule, CurrencyIdrPipe, IconComponent, DataTableComponent, FormModalComponent, ProductFormComponent, SparklineChartComponent],
   templateUrl: './dashboard.component.html'
 })
 export class MerchantDashboardComponent implements OnInit {
@@ -21,16 +24,26 @@ export class MerchantDashboardComponent implements OnInit {
 
   // Modal State
   showFormModal = signal(false);
+  sevenDayTotal = computed(() => this.store.revenueTrend().reduce((sum, point) => sum + (point.revenue ?? 0), 0));
+  sevenDayAverage = computed(() => {
+    const days = this.store.revenueTrend().length || 1;
+    return Math.round(this.sevenDayTotal() / days);
+  });
 
   columns: TableColumn[] = [
-    { key: 'product', label: 'Product', custom: true },
-    { key: 'price', label: 'Price', custom: true },
-    { key: 'stock', label: 'Stock', className: 'font-mono' },
-    { key: 'isActive', label: 'Status', custom: true }
+    { key: 'trx_id', label: 'Transaction ID', custom: true },
+    { key: 'createdAt', label: 'Date', custom: true },
+    { key: 'counterpartyName', label: 'Customer', custom: true },
+    { key: 'amount', label: 'Amount', custom: true, className: 'text-right' }
   ];
 
   ngOnInit(): void {
     this.store.loadDashboardData();
+  }
+
+  percentChange(today: number, yesterday: number): number {
+    if (!yesterday || yesterday === 0) return today === 0 ? 0 : 100;
+    return Math.round(((today - yesterday) / Math.abs(yesterday)) * 10000) / 100;
   }
 
   // --- FORM MODAL ACTIONS ---
@@ -49,5 +62,21 @@ export class MerchantDashboardComponent implements OnInit {
   onProductSaved() {
     this.closeFormModal();
     this.store.loadDashboardData(); // Refresh stats and recent list
+  }
+
+  itemId(item: TransactionHistoryItem): string {
+    return item.historyId || item.trx_id || '-';
+  }
+
+  itemDate(item: TransactionHistoryItem): string {
+    return item.createdAt || item.created_at || '';
+  }
+
+  itemAmount(item: TransactionHistoryItem): number {
+    if (typeof item.amount === 'number') return item.amount;
+    if (item.products?.length) {
+      return item.products.reduce((sum, p) => sum + p.priceAtTime * p.quantity, 0);
+    }
+    return 0;
   }
 }

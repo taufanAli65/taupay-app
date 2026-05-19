@@ -28,3 +28,39 @@ export interface CreateMerchantRequest {
   email: string;
   password: string;
 }
+
+export interface DashboardFinancial {
+  todayRevenue: number;
+  todayOrders: number;
+  yesterdayRevenue: number;
+  yesterdayOrders: number;
+  averageOrderValue: number;
+  activeProducts: number;
+  totalProducts: number;
+  deactivatedProducts: number;
+  lowStockCount: number;
+}
+
+export interface DailyRevenue {
+  date: string;
+  revenue: number;
+}
+
+export interface TopProduct {
+  productName: string;
+  totalQuantity: number;
+  totalRevenue: number;
+}
+
+export interface LowStockProduct {
+  productId: string;
+  productName: string;
+  stock: number;
+}
+
+export interface MerchantDashboardData {
+  financial: DashboardFinancial;
+  revenueTrend: DailyRevenue[];
+  topProducts: TopProduct[];
+  lowStockProducts: LowStockProduct[];
+}

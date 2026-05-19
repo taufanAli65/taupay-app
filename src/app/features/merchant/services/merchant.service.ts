@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '@env';
 import { ApiResponse } from '@shared/models/api-response.model';
 import { MerchantProfile, UpdateMerchantRequest, MerchantCategory } from '@shared/models/merchant.model';
+import { MerchantDashboardData } from '@shared/models/merchant.model';
 
 @Injectable({ providedIn: 'root' })
 export class MerchantService {
@@ -19,5 +20,9 @@ export class MerchantService {
 
   getCategories() {
     return this.http.get<ApiResponse<MerchantCategory[]>>(`${this.base}/category`);
+  }
+
+  getDashboard() {
+    return this.http.get<ApiResponse<MerchantDashboardData>>(`${this.base}/dashboard`);
   }
 }
