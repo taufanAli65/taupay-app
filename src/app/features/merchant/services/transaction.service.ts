@@ -41,6 +41,10 @@ export class TransactionService {
     );
   }
 
+  getTransactionDetails(trxId: string) {
+    return this.http.get<ApiResponse<Transaction>>(`${this.base}/${encodeURIComponent(trxId)}`);
+  }
+
   getHistory(startDate?: string, endDate?: string, page = 0, size = 10) {
     let params = new HttpParams().set('page', page).set('size', size);
     if (startDate) params = params.set('startDate', startDate);

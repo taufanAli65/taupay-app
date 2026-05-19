@@ -1,0 +1,77 @@
+<div class="animate-fade-in w-full max-w-sm mx-auto pt-6 pb-10">
+  <!-- Main Receipt Card -->
+  <div class="bg-white rounded-[24px] shadow-[0_8px_30px_rgb(0,0,0,0.08)] overflow-hidden border border-gray-100">
+
+    <!-- Top Section: Status & Amount -->
+    <div class="p-8 text-center relative" [class]="statusBgClass">
+      <!-- Status Icon -->
+      <div class="mx-auto w-20 h-20 rounded-full flex items-center justify-center mb-5 shadow-sm bg-white" [class]="statusBorderClass">
+        <app-icon [name]="iconName" class="w-10 h-10" [class]="statusTextClass"></app-icon>
+      </div>
+
+      <!-- Status Label -->
+      <h2 class="text-xl font-bold text-gray-800 tracking-tight mb-1">{{ statusLabel }}</h2>
+      <p class="text-sm text-gray-500 font-medium mb-6">{{ message() }}</p>
+
+      <!-- Amount (Crucial for QRIS look) -->
+      <div class="text-4xl font-black text-black tracking-tighter mb-3">
+        {{ amount() | currency:'IDR':'symbol-narrow':'1.0-0' }}
+      </div>
+
+      <!-- Payment Method Badge -->
+      <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-bold uppercase tracking-widest border border-blue-100">
+        <app-icon name="qr-code" class="w-3.5 h-3.5"></app-icon>
+        TauPay
+      </div>
+    </div>
+
+    <!-- Receipt Dashed Divider -->
+    <div class="relative flex items-center px-4">
+      <!-- Left cutout -->
+      <div class="w-6 h-6 bg-gray-50 rounded-full absolute -left-3 border-r border-gray-200"></div>
+      <!-- Dashed line -->
+      <div class="flex-1 border-t-2 border-dashed border-gray-200"></div>
+      <!-- Right cutout -->
+      <div class="w-6 h-6 bg-gray-50 rounded-full absolute -right-3 border-l border-gray-200"></div>
+    </div>
+
+    <!-- Bottom Section: Transaction Details -->
+    <div class="p-6 bg-white">
+      <div class="space-y-4 text-sm">
+        <div class="flex justify-between items-center">
+          <span class="text-gray-500 font-medium">Time</span>
+          <span class="font-bold text-gray-900">{{ date() | date:'dd MMM yyyy, HH:mm' }}</span>
+        </div>
+        
+        <div class="flex justify-between items-center">
+          <span class="text-gray-500 font-medium">Ref No.</span>
+          <span class="font-mono text-xs font-bold text-gray-900">{{ trxId() }}</span>
+        </div>
+
+        <div class="flex justify-between items-center">
+          <span class="text-gray-500 font-medium">Status</span>
+          <span class="font-bold uppercase tracking-wider text-[11px] px-2 py-0.5 rounded-md bg-gray-100" [class]="statusTextClass">
+            {{ status() }}
+          </span>
+        </div>
+      </div>
+      
+      <!-- Optional Detail Message -->
+      @if(detailMessage()) {
+        <div class="mt-6 p-4 bg-gray-50 rounded-xl border border-gray-100 text-xs text-gray-500 text-center leading-relaxed font-medium">
+          {{ detailMessage() }}
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Action Buttons (Stacked for Mobile) -->
+  <div class="mt-8 flex flex-col gap-3">
+    <a routerLink="/merchant/transactions/new" class="w-full flex justify-center items-center py-3.5 rounded-xl bg-emerald-dark text-white font-bold shadow-md shadow-emerald-dark/20 hover:bg-emerald-700 hover:-translate-y-0.5 transition-all">
+      Create New Transaction
+    </a>
+    <a routerLink="/merchant/transactions/history" class="w-full flex justify-center items-center py-3.5 rounded-xl border-2 border-gray-200 bg-transparent text-gray-600 font-bold hover:bg-gray-50 hover:border-gray-300 transition-all">
+      View History
+    </a>
+  </div>
+</div>

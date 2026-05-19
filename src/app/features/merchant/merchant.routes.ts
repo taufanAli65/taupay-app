@@ -40,6 +40,10 @@ export const MERCHANT_ROUTES: Routes = [
         loadComponent: () => import('./transactions/transaction-history/transaction-history.component').then(m => m.TransactionHistoryComponent)
       },
       {
+        path: 'transactions/:trxId/status',
+        loadComponent: () => import('./transactions/transaction-status/transaction-status.component').then(m => m.TransactionStatusComponent)
+      },
+      {
         path: 'transactions/:trxId',
         loadComponent: () => import('./transactions/transaction-detail/transaction-detail.component').then(m => m.TransactionDetailComponent)
       },

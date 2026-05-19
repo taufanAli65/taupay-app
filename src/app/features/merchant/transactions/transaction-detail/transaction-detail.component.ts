@@ -159,27 +159,27 @@ export class TransactionDetailComponent implements OnInit, OnDestroy {
 
     if (event.status === 'PAID') {
       this.status.set('paid');
-      this.finalizeStatus('Payment received. Redirecting to new transaction...', ['/merchant/transactions/new'], 'success');
+      this.finalizeStatus('Payment received.', 'success', 'Payment completed successfully.');
       return;
     }
 
     if (event.status === 'FAILED') {
       this.status.set('failed');
-      this.finalizeStatus('Payment failed. Redirecting to create a new transaction...', ['/merchant/transactions/new'], 'danger');
+      this.finalizeStatus('Payment failed.', 'danger', 'The payment did not go through.');
       return;
     }
 
     if (event.status === 'EXPIRED') {
       this.status.set('expired');
-      this.finalizeStatus('QR payment expired. Redirecting to create a new transaction...', ['/merchant/transactions/new'], 'danger');
+      this.finalizeStatus('QR payment expired.', 'warning', 'The QR code expired before payment was completed.');
       return;
     }
   }
 
   private finalizeStatus(
     message: string,
-    commands: string[],
-    toastType: 'success' | 'danger' | 'warning'
+    toastType: 'success' | 'danger' | 'warning',
+    detailMessage: string
   ): void {
     this.terminalHandled = true;
     this.stopCountdown();
@@ -187,7 +187,18 @@ export class TransactionDetailComponent implements OnInit, OnDestroy {
     this.stopStatusStream();
     this.toast.show(message, toastType);
     this.redirectTimer = setTimeout(() => {
-      void this.router.navigate(commands);
+      const amount = this.transaction()?.total ?? 0;
+      const createdAt = this.transaction()?.created_at ?? new Date().toISOString();
+      void this.router.navigate(['/merchant/transactions', this.trxId, 'status'], {
+        state: {
+          status: this.status(),
+          trxId: this.trxId,
+          message,
+          detailMessage,
+          amount,
+          date: createdAt
+        }
+      });
     }, 1500);
   }
 
