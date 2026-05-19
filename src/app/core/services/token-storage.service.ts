@@ -1,26 +1,29 @@
-import { Injectable } from '@angular/core';
+import { Injectable, PLATFORM_ID, inject } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { JwtPayload, UserRole } from '@shared/models/auth.model';
 
 const TOKEN_KEY = 'taupay_token';
 
-function safeStorage(): Storage | null {
-  try { return typeof localStorage !== 'undefined' ? localStorage : null; }
-  catch { return null; }
-}
-
 @Injectable({ providedIn: 'root' })
 export class TokenStorageService {
+  private platformId = inject(PLATFORM_ID);
+
+  private safeStorage(): Storage | null {
+    if (!isPlatformBrowser(this.platformId)) return null;
+    try { return localStorage; }
+    catch { return null; }
+  }
 
   setToken(token: string): void {
-    safeStorage()?.setItem(TOKEN_KEY, token);
+    this.safeStorage()?.setItem(TOKEN_KEY, token);
   }
 
   getToken(): string | null {
-    return safeStorage()?.getItem(TOKEN_KEY) ?? null;
+    return this.safeStorage()?.getItem(TOKEN_KEY) ?? null;
   }
 
   clearToken(): void {
-    safeStorage()?.removeItem(TOKEN_KEY);
+    this.safeStorage()?.removeItem(TOKEN_KEY);
   }
 
   getDecodedToken(): JwtPayload | null {
