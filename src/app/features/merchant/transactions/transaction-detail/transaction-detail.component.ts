@@ -137,7 +137,7 @@ export class TransactionDetailComponent implements OnInit, OnDestroy {
         this.status.set('expired');
         this.stopCountdown();
         if (!this.terminalHandled) {
-          this.finalizeStatus('QR payment expired. Redirecting to new transaction...', ['/merchant/transactions/new'], 'danger');
+          this.finalizeStatus('QR payment expired. Redirecting to new transaction...', 'warning', 'The QR code expired before payment was completed.');
         }
       }
     };
