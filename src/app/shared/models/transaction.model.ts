@@ -50,6 +50,7 @@ export interface TransactionHistoryItem {
 export interface PaymentCallback {
   trx_id: string;
   pin: string;
+  status?: string;
 }
 
 export interface CartItem {

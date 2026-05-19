@@ -29,7 +29,7 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
       } else if (status === 403) {
         toast.show(message, 'danger');
       } else if (status === 404) {
-        toast.show('Resource not found.', 'warning');
+        toast.show(message === 'An unexpected error occurred.' ? 'Resource not found.' : message, 'warning');
       } else if (status === 400) {
         toast.show(message, 'danger');
       } else if (status >= 500) {

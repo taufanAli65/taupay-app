@@ -34,7 +34,11 @@ export class TransactionService {
   }
 
   sendCallback(body: PaymentCallback) {
-    return this.http.post<ApiResponse<void>>(`${this.base}/${encodeURIComponent(body.trx_id)}/callback`, body);
+    return this.http.post<ApiResponse<void>>(
+      `${this.base}/${encodeURIComponent(body.trx_id)}/callback`, 
+      body, 
+      { withCredentials: true }
+    );
   }
 
   getHistory(startDate?: string, endDate?: string, page = 0, size = 10) {
