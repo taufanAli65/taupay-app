@@ -29,7 +29,11 @@ export class UserTransactionService {
   }
 
   sendCallback(body: PaymentCallback) {
-    return this.http.post<ApiResponse<void>>(`${this.transactionBase}/${encodeURIComponent(body.trx_id)}/callback`, body);
+    return this.http.post<ApiResponse<void>>(
+      `${this.transactionBase}/${encodeURIComponent(body.trx_id)}/callback`, 
+      body,
+      { withCredentials: true }
+    );
   }
 
   subscribeToStatus(trxId: string): Observable<TransactionStatusEvent> {

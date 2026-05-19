@@ -9,18 +9,26 @@
     </a>
   </div>
 
-  <!-- Status Banner -->
-  <div class="flex items-center gap-3 p-4 rounded-xl border-2 mb-8" 
+  <div class="flex items-center justify-between p-4 rounded-xl border-2 mb-8" 
        [class.bg-yellow-50]="status() === 'waiting'" [class.border-yellow-400]="status() === 'waiting'" [class.text-yellow-700]="status() === 'waiting'"
        [class.bg-green-50]="status() === 'paid'" [class.border-green-500]="status() === 'paid'" [class.text-green-700]="status() === 'paid'"
        [class.bg-red-50]="status() === 'failed'" [class.border-red-500]="status() === 'failed'" [class.text-red-700]="status() === 'failed'"
        [class.bg-orange-50]="status() === 'expired'" [class.border-orange-400]="status() === 'expired'" [class.text-orange-700]="status() === 'expired'">
-    <app-icon [name]="status() === 'paid' ? 'check-circle' : (status() === 'waiting' ? 'clock' : 'x-circle')" class="w-5 h-5"></app-icon>
-    <span class="font-bold text-lg">{{ statusLabel }}</span>
+    <div class="flex items-center gap-3">
+      <app-icon [name]="status() === 'paid' ? 'check-circle' : (status() === 'waiting' ? 'clock' : 'x-circle')" class="w-5 h-5"></app-icon>
+      <span class="font-bold text-lg">{{ statusLabel }}</span>
+      @if (status() === 'waiting') {
+        <span class="text-sm ml-2 font-medium opacity-80 italic">Waiting for customer to pay...</span>
+      } @else if (status() === 'expired') {
+        <span class="text-sm ml-2 font-medium opacity-80 italic">This transaction has expired.</span>
+      }
+    </div>
+    
     @if (status() === 'waiting') {
-      <span class="text-sm ml-2 font-medium opacity-80">Waiting for payment...</span>
-    } @else if (status() === 'expired') {
-      <span class="text-sm ml-2 font-medium opacity-80">The payment window has expired.</span>
+      <div class="flex flex-col items-end">
+        <span class="text-[10px] font-black uppercase tracking-widest opacity-60">Expires in</span>
+        <span class="font-mono font-black text-xl tabular-nums leading-none">{{ countdownDisplay() }}</span>
+      </div>
     }
   </div>
 
@@ -74,8 +82,24 @@
           <!-- QR Code for Wallet App -->
           <div class="h-px bg-cream-dark w-full my-4"></div>
           <div class="flex flex-col items-center justify-center p-4 bg-gray-50 rounded-lg border border-dashed border-gray-300">
-            <qrcode [qrdata]="t.trx_id" [width]="200" [errorCorrectionLevel]="'M'"></qrcode>
-            <span class="text-xs text-gray-500 mt-2 font-medium">Scan with Wallet App to pay</span>
+            @if (status() === 'waiting') {
+              <qrcode [qrdata]="t.trx_id" [width]="200" [errorCorrectionLevel]="'M'"></qrcode>
+              <div class="mt-4 flex flex-col items-center">
+                <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Scan to Pay</span>
+                <div class="flex items-center gap-2 px-3 py-1 bg-black text-white rounded-full font-mono text-sm font-bold shadow-lg shadow-black/10">
+                  <app-icon name="clock" class="w-3 h-3 text-white"></app-icon>
+                  {{ countdownDisplay() }}
+                </div>
+              </div>
+            } @else {
+              <div class="w-[200px] h-[200px] flex items-center justify-center bg-gray-100 rounded-lg opacity-50 relative overflow-hidden grayscale">
+                <qrcode [qrdata]="t.trx_id" [width]="200" [errorCorrectionLevel]="'M'"></qrcode>
+                <div class="absolute inset-0 flex items-center justify-center bg-black/10">
+                   <span class="bg-white px-4 py-2 rounded-lg font-black uppercase text-xs tracking-widest text-red-600 shadow-xl border-2 border-red-100">{{ status() }}</span>
+                </div>
+              </div>
+              <p class="mt-4 text-xs font-bold text-gray-400 uppercase tracking-widest">QR Code Inactive</p>
+            }
           </div>
         </div>
       </div>
