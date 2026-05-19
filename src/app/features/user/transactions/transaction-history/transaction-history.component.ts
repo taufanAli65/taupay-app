@@ -1,46 +1,30 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { UserTransactionService } from '@features/user/services/user-transaction.service';
+import { UserTransactionHistoryStore } from '../../state/user-transaction-history.store';
 import { TransactionHistoryItem } from '@shared/models/transaction.model';
 import { CurrencyIdrPipe } from '@shared/pipes/currency-idr.pipe';
-import { PaginationComponent } from '@shared/components/pagination/pagination.component';
+import { DataTableComponent } from '@shared/components/data-table/data-table.component';
+import { TableColumn } from '@shared/components/data-table/data-table.model';
 import { IconComponent } from '@shared/components/icon/icon.component';
 
 @Component({
   selector: 'app-user-transaction-history',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, CurrencyIdrPipe, PaginationComponent, IconComponent],
+  imports: [CommonModule, FormsModule, RouterLink, CurrencyIdrPipe, DataTableComponent, IconComponent],
   templateUrl: './transaction-history.component.html'
 })
 export class UserTransactionHistoryComponent implements OnInit {
-  private userTransactionService = inject(UserTransactionService);
+  readonly store = inject(UserTransactionHistoryStore);
 
-  history = signal<TransactionHistoryItem[]>([]);
-  loading = signal(false);
-  currentPage = signal(0);
-  totalPages = signal(1);
+  columns: TableColumn[] = [
+    { key: 'merchantInfo', label: 'Details', custom: true },
+    { key: 'amountInfo', label: 'Amount & Date', custom: true, className: 'text-right' }
+  ];
 
-  startDate = '';
-  endDate = '';
-
-  ngOnInit(): void { this.loadPage(0); }
-
-  applyFilters(): void { this.loadPage(0); }
-
-  loadPage(page: number): void {
-    this.loading.set(true);
-    this.userTransactionService.getHistory(this.startDate || undefined, this.endDate || undefined, page, 10).subscribe({
-      next: res => {
-        this.history.set(res.data ?? []);
-        this.currentPage.set(res.pagination?.page ?? page);
-        const hasMore = (res.data?.length ?? 0) >= 10;
-        this.totalPages.set(hasMore ? page + 2 : page + 1);
-        this.loading.set(false);
-      },
-      error: () => this.loading.set(false)
-    });
+  ngOnInit(): void {
+    this.store.loadPage(0);
   }
 
   itemId(item: TransactionHistoryItem): string {
@@ -57,13 +41,5 @@ export class UserTransactionHistoryComponent implements OnInit {
       return item.products.reduce((sum, p) => sum + p.priceAtTime * p.quantity, 0);
     }
     return 0;
-  }
-
-  itemCounterparty(item: TransactionHistoryItem): string {
-    return item.counterpartyName || '—';
-  }
-
-  itemCategory(item: TransactionHistoryItem): string {
-    return item.category || '—';
   }
 }

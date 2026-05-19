@@ -8,6 +8,8 @@ import { TransactionStatusEvent } from '@shared/models/transaction.model';
 import { Subscription } from 'rxjs';
 import { QRCodeModule } from 'angularx-qrcode';
 import { IconComponent } from '@shared/components/icon/icon.component';
+import { CurrencyIdrPipe } from '@shared/pipes/currency-idr.pipe';
+import jsQR from 'jsqr';
 
 type BarcodeDetectorCtor = new (options?: { formats?: string[] }) => {
   detect(source: ImageBitmapSource): Promise<Array<{ rawValue?: string }>>;
@@ -16,7 +18,7 @@ type BarcodeDetectorCtor = new (options?: { formats?: string[] }) => {
 @Component({
   selector: 'app-user-pay',
   standalone: true,
-  imports: [CommonModule, RouterLink, ReactiveFormsModule, QRCodeModule, IconComponent],
+  imports: [CommonModule, RouterLink, ReactiveFormsModule, QRCodeModule, IconComponent, CurrencyIdrPipe],
   templateUrl: './pay.component.html'
 })
 export class UserPayComponent implements OnInit, OnDestroy {
@@ -29,7 +31,9 @@ export class UserPayComponent implements OnInit, OnDestroy {
 
   @ViewChild('qrFileInput') qrFileInput?: ElementRef<HTMLInputElement>;
   @ViewChild('cameraVideo') cameraVideo?: ElementRef<HTMLVideoElement>;
+  @ViewChild('scanCanvas') scanCanvas?: ElementRef<HTMLCanvasElement>;
   @ViewChild('pinInput') pinInput?: ElementRef<HTMLInputElement>;
+
   status = signal<'idle' | 'waiting' | 'paid' | 'failed'>('idle');
   paying = signal(false);
   trxId = signal('');
@@ -43,7 +47,7 @@ export class UserPayComponent implements OnInit, OnDestroy {
   // Multi-step flow: 'scan' -> 'confirm' -> 'pin' -> 'result'
   step = signal<'scan' | 'confirm' | 'pin' | 'result'>('scan');
 
-  transactionDetail = signal<{ trxId: string; merchantName?: string; total?: number } | null>(null);
+  transactionDetail = signal<{ trxId: string; merchantId?: string; total?: number; products?: any[] } | null>(null);
 
   payForm = this.fb.group({
     trxId: ['', Validators.required],
@@ -53,7 +57,7 @@ export class UserPayComponent implements OnInit, OnDestroy {
   private sseSub?: Subscription;
   private redirectTimer?: ReturnType<typeof setTimeout>;
   private mediaStream?: MediaStream;
-  private scanTimer?: ReturnType<typeof setInterval>;
+  private scanTimer?: any;
 
   get statusLabel(): string {
     return {
@@ -68,12 +72,7 @@ export class UserPayComponent implements OnInit, OnDestroy {
     if (!isPlatformBrowser(this.platformId)) {
       return;
     }
-
-    const detectorCtor = this.getBarcodeDetectorCtor();
     this.cameraSupported.set(Boolean(navigator.mediaDevices?.getUserMedia));
-    if (!detectorCtor) {
-      this.scanError.set('This browser cannot scan QR codes directly. You can still open the camera or upload an image.');
-    }
   }
 
   triggerQrUpload(): void {
@@ -122,12 +121,8 @@ export class UserPayComponent implements OnInit, OnDestroy {
       video.muted = true;
       video.playsInline = true;
       await video.play();
-      const detectorCtor = this.getBarcodeDetectorCtor();
-      if (detectorCtor) {
-        this.startCameraScanLoop(detectorCtor);
-      } else {
-        this.scanError.set('Camera preview is open. If your browser cannot scan QR directly, upload a QR image instead.');
-      }
+      
+      this.startCameraScanLoop();
       this.toast.show('Camera opened. Point it at the merchant QRIS code.', 'success');
     } catch {
       this.scanError.set('Unable to open the camera. Check browser permissions or upload an image instead.');
@@ -139,7 +134,7 @@ export class UserPayComponent implements OnInit, OnDestroy {
 
   stopCamera(): void {
     if (this.scanTimer) {
-      clearInterval(this.scanTimer);
+      cancelAnimationFrame(this.scanTimer);
       this.scanTimer = undefined;
     }
 
@@ -181,57 +176,76 @@ export class UserPayComponent implements OnInit, OnDestroy {
         return;
       }
 
-      this.payForm.patchValue({ trxId });
-      this.trxId.set(trxId);
-      this.status.set('idle');
-      this.transactionDetail.set({ trxId });
-      this.step.set('confirm');
-      this.toast.show('Transaction QR loaded. Confirm details to continue.', 'success');
+      this.processDetectedTrx(trxId);
     } finally {
       this.qrLoading.set(false);
     }
   }
 
-  private startCameraScanLoop(detectorCtor: BarcodeDetectorCtor): void {
-    const detector = new detectorCtor({ formats: ['qr_code'] });
-    this.scanTimer = setInterval(async () => {
+  processDetectedTrx(trxId: string): void {
+    if (!trxId?.trim()) return;
+    this.qrLoading.set(true);
+    this.userTransactionService.getTransactionDetail(trxId.trim()).subscribe({
+      next: (res) => {
+        const data = res.data;
+        if (data.status !== 'PENDING') {
+          this.toast.show(`Transaction is already ${data.status.toLowerCase()}`, 'warning');
+          this.qrLoading.set(false);
+          this.resetFlow();
+          return;
+        }
+
+        this.payForm.patchValue({ trxId: trxId.trim() });
+        this.trxId.set(trxId.trim());
+        this.transactionDetail.set({
+          trxId: trxId.trim(),
+          merchantId: data.merchant_id,
+          total: data.total || 0,
+          products: data.products || []
+        });
+        this.step.set('confirm');
+        this.qrLoading.set(false);
+        this.toast.show('Transaction loaded.', 'success');
+      },
+      error: () => {
+        this.qrLoading.set(false);
+        this.toast.show('Invalid Transaction ID or server error.', 'danger');
+        this.scanError.set('Transaction not found. Please check the ID.');
+      }
+    });
+  }
+
+  private startCameraScanLoop(): void {
+    const scan = () => {
       if (!this.cameraActive() || this.paying()) {
         return;
       }
 
       const video = this.cameraVideo?.nativeElement;
-      if (!video || video.readyState < 2) {
-        return;
-      }
+      const canvas = this.scanCanvas?.nativeElement;
 
-      try {
-        const codes = await detector.detect(video);
-        const trxId = codes[0]?.rawValue?.trim();
-        if (!trxId) {
-          return;
+      if (video && canvas && video.readyState === video.HAVE_ENOUGH_DATA) {
+        const context = canvas.getContext('2d');
+        if (context) {
+          canvas.height = video.videoHeight;
+          canvas.width = video.videoWidth;
+          context.drawImage(video, 0, 0, canvas.width, canvas.height);
+          
+          const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+          const code = jsQR(imageData.data, imageData.width, imageData.height, {
+            inversionAttempts: "dontInvert",
+          });
+
+          if (code && code.data) {
+            this.stopCamera();
+            this.processDetectedTrx(code.data);
+            return;
+          }
         }
-
-        this.payForm.patchValue({ trxId });
-        this.trxId.set(trxId);
-        this.status.set('idle');
-        this.selectedFileName.set('');
-        this.scanError.set('');
-        this.transactionDetail.set({ trxId });
-        this.step.set('confirm');
-        this.toast.show('QRIS code detected. Confirm details to continue.', 'success');
-        this.stopCamera();
-      } catch {
-        // Ignore frame-level detection failures and keep scanning.
       }
-    }, 500);
-  }
-
-  private getBarcodeDetectorCtor(): BarcodeDetectorCtor | undefined {
-    return (globalThis as unknown as Window & {
-      BarcodeDetector?: new (options?: { formats?: string[] }) => {
-        detect(source: ImageBitmapSource): Promise<Array<{ rawValue?: string }>>;
-      };
-    }).BarcodeDetector;
+      this.scanTimer = requestAnimationFrame(scan);
+    };
+    this.scanTimer = requestAnimationFrame(scan);
   }
 
   private async decodeQrFromFile(file: File): Promise<string | null> {
@@ -239,30 +253,27 @@ export class UserPayComponent implements OnInit, OnDestroy {
       return null;
     }
 
-    const detectorCtor = this.getBarcodeDetectorCtor();
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const context = canvas.getContext('2d');
+          if (!context) return resolve(null);
 
-    if (!detectorCtor || typeof createImageBitmap === 'undefined') {
-      return null;
-    }
+          canvas.width = img.width;
+          canvas.height = img.height;
+          context.drawImage(img, 0, 0);
 
-    const detector = new detectorCtor({ formats: ['qr_code'] });
-    const bitmap = await createImageBitmap(file);
-    try {
-      const canvas = document.createElement('canvas');
-      canvas.width = bitmap.width;
-      canvas.height = bitmap.height;
-
-      const context = canvas.getContext('2d');
-      if (!context) {
-        return null;
-      }
-
-      context.drawImage(bitmap, 0, 0);
-      const codes = await detector.detect(canvas);
-      return codes[0]?.rawValue?.trim() ?? null;
-    } finally {
-      bitmap.close();
-    }
+          const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+          const code = jsQR(imageData.data, imageData.width, imageData.height);
+          resolve(code ? code.data : null);
+        };
+        img.src = e.target?.result as string;
+      };
+      reader.readAsDataURL(file);
+    });
   }
 
   onSubmit(): void {
@@ -281,8 +292,9 @@ export class UserPayComponent implements OnInit, OnDestroy {
 
     this.userTransactionService.sendCallback({
       trx_id: trxIdValue,
-      pin: pinValue
-    }).subscribe({
+      pin: pinValue,
+      status: 'PAID'
+    } as any).subscribe({
       next: () => {
         this.status.set('paid');
         this.toast.show('Payment successful!', 'success');
@@ -295,13 +307,11 @@ export class UserPayComponent implements OnInit, OnDestroy {
       error: () => {
         this.status.set('idle');
         this.paying.set(false);
-        // Error toast is handled by global errorInterceptor
         this.step.set('pin');
         this.focusPinInput();
       }
     });
 
-    // Optionally subscribe to SSE for live confirmation
     if (trxIdValue) {
       this.sseSub = this.userTransactionService.subscribeToStatus(trxIdValue).subscribe({
         next: (event: TransactionStatusEvent) => {
@@ -311,9 +321,7 @@ export class UserPayComponent implements OnInit, OnDestroy {
             this.status.set('failed');
           }
         },
-        error: () => {
-          // Silently handle SSE errors - the HTTP callback already completed
-        }
+        error: () => {}
       });
     }
   }
@@ -356,7 +364,6 @@ export class UserPayComponent implements OnInit, OnDestroy {
     this.payForm.get('pin')?.setValue((current as string).slice(0, -1));
   }
 
-  // Public helper for template to reset and navigate
   goBack(): void {
     this.resetFlow();
     void this.router.navigate(['/user/transactions/history']);

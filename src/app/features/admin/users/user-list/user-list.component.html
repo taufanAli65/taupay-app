@@ -47,14 +47,26 @@
     </a>
     @if (u.isActive) {
       <button class="bg-red-50 hover:bg-red-100 text-red-600 font-bold py-1.5 px-3 rounded text-xs transition-all border border-red-200" 
-              (click)="store.toggleStatus(u, false)">
+              (click)="triggerStatusConfirm(u, false)">
         Deactivate
       </button>
     } @else {
       <button class="bg-green-50 hover:bg-green-100 text-green-700 font-bold py-1.5 px-3 rounded text-xs transition-all border border-green-200" 
-              (click)="store.toggleStatus(u, true)">
+              (click)="triggerStatusConfirm(u, true)">
         Activate
       </button>
     }
   </div>
 </ng-template>
+
+<!-- Status Confirmation Modal -->
+<app-modal
+  *ngIf="showStatusModal()"
+  [title]="targetStatus() ? 'Activate User?' : 'Deactivate User?'"
+  [type]="targetStatus() ? 'info' : 'danger'"
+  [confirmLabel]="targetStatus() ? 'Yes, Activate' : 'Yes, Deactivate'"
+  (onConfirm)="confirmStatusToggle()"
+  (onCancel)="closeStatusModal()">
+  Are you sure you want to {{ targetStatus() ? 'activate' : 'deactivate' }} user 
+  <span class="font-bold text-black">"{{ userToToggle()?.firstName }} {{ userToToggle()?.lastName }}"</span>?
+</app-modal>

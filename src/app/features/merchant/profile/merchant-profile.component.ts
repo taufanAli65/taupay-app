@@ -1,50 +1,60 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, effect } from '@angular/core';
 import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { MerchantService } from '@features/merchant/services/merchant.service';
-import { ToastService } from '@shared/components/toast/toast.service';
-import { MerchantProfile, MerchantCategory } from '@shared/models/merchant.model';
+import { MerchantProfileStore } from '../state/merchant-profile.store';
+import { CurrencyIdrPipe } from '@shared/pipes/currency-idr.pipe';
+import { IconComponent } from '@shared/components/icon/icon.component';
+import { UpdateMerchantRequest } from '@shared/models/merchant.model';
 
 @Component({
   selector: 'app-merchant-profile',
   standalone: true,
-  imports: [ReactiveFormsModule, CommonModule],
+  imports: [ReactiveFormsModule, CommonModule, CurrencyIdrPipe, IconComponent],
   templateUrl: './merchant-profile.component.html'
 })
 export class MerchantProfileComponent implements OnInit {
   private fb = inject(FormBuilder);
-  private merchantService = inject(MerchantService);
-  private toast = inject(ToastService);
-  profile = signal<MerchantProfile | null>(null);
-  categories = signal<MerchantCategory[]>([]);
-  saving = signal(false);
+  readonly store = inject(MerchantProfileStore);
 
   form = this.fb.group({
     name: ['', Validators.required],
     categoryId: ['', Validators.required],
     address: ['', Validators.required],
-    pin: ['', Validators.pattern(/^\d{6}$/)]
+    pin: ['', [Validators.pattern(/^\d{6}$/)]]
   });
 
-  ngOnInit(): void {
-    this.merchantService.getCategories().subscribe(r => this.categories.set(r.data));
-    this.merchantService.getMe().subscribe(r => {
-      this.profile.set(r.data);
-      this.form.patchValue({ name: r.data.name, categoryId: r.data.categoryId, address: r.data.address });
+  constructor() {
+    // Re-patch form when profile is loaded
+    effect(() => {
+      const p = this.store.profile();
+      if (p) {
+        this.form.patchValue({
+          name: p.name,
+          categoryId: p.categoryId,
+          address: p.address
+        }, { emitEvent: false });
+      }
     });
   }
 
+  ngOnInit(): void {
+    this.store.loadInitialData();
+  }
+
   onSubmit(): void {
-    if (this.form.invalid) { this.form.markAllAsTouched(); return; }
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+
     const raw = this.form.getRawValue();
-    const payload = {
-      ...raw,
-      pin: raw.pin?.trim() ? raw.pin : undefined
+    const payload: UpdateMerchantRequest = {
+      name: raw.name ?? '',
+      categoryId: raw.categoryId ?? '',
+      address: raw.address ?? '',
+      pin: raw.pin && raw.pin.trim() ? raw.pin.trim() : undefined
     };
-    this.saving.set(true);
-    this.merchantService.updateMe(payload as any).subscribe({
-      next: () => { this.toast.show('Profile updated!', 'success'); this.saving.set(false); },
-      error: () => this.saving.set(false)
-    });
+
+    this.store.updateProfile(payload);
   }
 }

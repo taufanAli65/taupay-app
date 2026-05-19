@@ -79,14 +79,26 @@
     </button>
     @if (m.active) {
       <button class="bg-red-50 hover:bg-red-100 text-red-600 font-bold py-1.5 px-3 rounded-lg transition-all border border-red-200 text-xs" 
-              (click)="store.toggleStatus(m, false)">
+              (click)="triggerStatusConfirm(m, false)">
         Deactivate
       </button>
     } @else {
       <button class="bg-green-50 hover:bg-green-100 text-green-700 font-bold py-1.5 px-3 rounded-lg transition-all border border-green-200 text-xs" 
-              (click)="store.toggleStatus(m, true)">
+              (click)="triggerStatusConfirm(m, true)">
         Activate
       </button>
     }
   </div>
 </ng-template>
+
+<!-- Status Confirmation Modal -->
+<app-modal
+  *ngIf="showStatusModal()"
+  [title]="targetStatus() ? 'Activate Merchant?' : 'Deactivate Merchant?'"
+  [type]="targetStatus() ? 'info' : 'danger'"
+  [confirmLabel]="targetStatus() ? 'Yes, Activate' : 'Yes, Deactivate'"
+  (onConfirm)="confirmStatusToggle()"
+  (onCancel)="closeStatusModal()">
+  Are you sure you want to {{ targetStatus() ? 'activate' : 'deactivate' }} merchant 
+  <span class="font-bold text-black">"{{ merchantToToggle()?.name }}"</span>?
+</app-modal>

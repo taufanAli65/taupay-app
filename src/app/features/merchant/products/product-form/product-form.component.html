@@ -49,7 +49,8 @@
       <label class="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest">Price (IDR) *</label>
       <div class="relative">
         <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-sm">Rp</span>
-        <input type="number" formControlName="price"
+        <input type="text" formControlName="price" placeholder="0"
+          (input)="onPriceInput($event)"
           class="w-full bg-cream/30 border border-cream-dark rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-light transition-all font-bold"
           [class.border-red-300]="isInvalid('price')">
       </div>
