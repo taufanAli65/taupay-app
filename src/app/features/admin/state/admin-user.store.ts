@@ -74,24 +74,58 @@ export class AdminUserStore {
   }
 
   toggleStatus(user: UserProfile, activate: boolean) {
-    const previousUsers = [...this.users()];
-    const updatedUsers = previousUsers.map(u => 
+    const previousState = {
+      users: [...this.users()],
+      totalElements: this.totalElements(),
+      totalPages: this.totalPages(),
+      currentPage: this.currentPage()
+    };
+
+    const updatedUsers = previousState.users.map(u => 
       u.id === user.id ? { ...u, isActive: activate } : u
     );
-    
-    this.patchState({ users: updatedUsers });
 
-    this.userService.activate(user.id).pipe(
+    const filteredUsers = updatedUsers.filter(u => this.matchesActiveFilter(u.isActive));
+    const removedByFilter = filteredUsers.length !== updatedUsers.length;
+    
+    const nextTotalElements = removedByFilter
+      ? Math.max(0, previousState.totalElements - 1)
+      : previousState.totalElements;
+    const nextTotalPages = Math.max(1, Math.ceil(nextTotalElements / 10));
+
+    this.patchState({ 
+      users: filteredUsers,
+      totalElements: nextTotalElements,
+      totalPages: nextTotalPages
+    });
+
+    const call = activate ? this.userService.activate(user.id) : this.userService.deactivate(user.id);
+
+    call.pipe(
       takeUntilDestroyed(this.destroyRef)
     ).subscribe({
       next: () => {
         this.toast.show(`User ${activate ? 'activated' : 'deactivated'}!`, 'success');
+        const targetPage = Math.min(previousState.currentPage, Math.max(0, nextTotalPages - 1));
+        this.loadPage(targetPage);
       },
       error: () => {
-        this.patchState({ users: previousUsers });
+        this.patchState({ 
+          users: previousState.users,
+          totalElements: previousState.totalElements,
+          totalPages: previousState.totalPages,
+          currentPage: previousState.currentPage
+        });
         this.toast.show('Failed to update user status', 'danger');
       }
     });
+  }
+
+  private matchesActiveFilter(isActive: boolean): boolean {
+    const filter = this.activeFilters()?.['isActive'];
+    if (filter === '' || filter === null || filter === undefined) return true;
+    const boolFilter = filter === true || filter === 'true';
+    return isActive === boolFilter;
   }
 
   private patchState(partial: Partial<AdminUserState>) {
