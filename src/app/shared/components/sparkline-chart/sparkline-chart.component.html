@@ -1,0 +1,31 @@
+<div class="w-full">
+  <div class="grid grid-cols-[auto_minmax(0,1fr)] gap-3 items-stretch">
+    <div class="flex flex-col justify-between py-2 text-[11px] font-semibold text-gray-400 leading-none min-h-[100px]">
+      <span *ngIf="yLabels.length > 0">{{ formatCurrency(yLabels[0]) }}</span>
+      <span *ngIf="yLabels.length > 1">{{ formatCurrency(yLabels[1]) }}</span>
+      <span *ngIf="yLabels.length > 2">{{ formatCurrency(yLabels[2]) }}</span>
+    </div>
+
+    <div>
+      <svg [attr.viewBox]="viewBox" width="100%" preserveAspectRatio="none" class="block h-[140px]">
+        <defs>
+          <linearGradient id="sparkGradient" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stop-color="#0B422A" stop-opacity="0.14" />
+            <stop offset="100%" stop-color="#0B422A" stop-opacity="0.02" />
+          </linearGradient>
+        </defs>
+
+        <g>
+          <path *ngIf="areaPath" [attr.d]="areaPath" fill="url(#sparkGradient)" stroke="none"></path>
+          <polyline *ngIf="linePoints" [attr.points]="linePoints" fill="none" stroke="#0B422A" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"></polyline>
+        </g>
+      </svg>
+
+      <div
+        class="mt-2 grid gap-2 text-center text-[11px] font-semibold text-gray-400"
+        [style.gridTemplateColumns]="xLabels.length ? 'repeat(' + xLabels.length + ', minmax(0, 1fr))' : '1fr'">
+        <span *ngFor="let label of xLabels">{{ label }}</span>
+      </div>
+    </div>
+  </div>
+</div>
